@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html>
- 
-    <head>
-        <script src="src/jquery-3.3.1.min.js"></script>
-        <script src="src/bootstrap.bundle.min.js"></script>
-            <link rel="stylesheet" type="text/css" href="src/bootstrap.min.css">
-    </head>
- 
-    <body>
-<div class="jumbotron jumbotron-fluid">
-<div class="container">
-<h1 class="display-4">Tech Tutorials X</h1>
-<p class="lead">Testing Bootstrap.</p>
- 
-</div>
-</div>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta charset="utf-8">
+	<meta http-equiv="cache-control" content="no-cache" />
+	<meta http-equiv="expires" content="0" />
+	<meta http-equiv="cache-control" content="no-cache" />
+	<meta http-equiv="pragma" content="no-cache" />
+
+	<title>Train Controller 2018-8</title>
+	<script
+		id="sap-ui-bootstrap"
+		src="https://openui5.hana.ondemand.com/resources/sap-ui-core.js"
+		data-sap-ui-theme="sap_belize"
+		data-sap-ui-libs="sap.m"
+		data-sap-ui-compatVersion="edge"
+		data-sap-ui-preload="async"
+		data-sap-ui-resourceroots='{ "view": "/static/" }'>
+
+	</script>
+	<script>
+		sap.ui.getCore().attachInit(function () {
+			sap.ui.xmlview({
+				viewName: "view.App"
+			}).placeAt("content");
+		});
+
+	</script>
+</head>
+<body class="sapUiBody" id="content">
 </body>
- 
 </html>

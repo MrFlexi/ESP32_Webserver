@@ -46,6 +46,7 @@ void setup(){
   });
  
   server.begin();
+  server.serveStatic("/", SPIFFS, "/");
 }
  
 void loop(){}
