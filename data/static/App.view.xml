@@ -63,36 +63,36 @@
 			<NavContainer id="pageContainer">
 				<pages>
 					<ScrollContainer id="Home" horizontal="false" vertical="true" height="100%">
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Track Yard"
-											subheader="display/create" press="press">
-								<TileContent footer="Manage">
+							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Lora Settings"
+											subheader="" press="press">
+								<TileContent footer="Edit">
 									<ImageContent src="/static/images/trackyard.png" />
 								</TileContent>
 							</GenericTile>
 
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Lok Liste"
-											subheader="create" press="press">
-								<TileContent footer="My Locomotions">
+							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Data Browser"
+											subheader="" press="press">
+								<TileContent footer="Last 24h">
 									<ImageContent src="sap-icon://home-share" />
 								</TileContent>
 							</GenericTile>
 					</ScrollContainer>
 
 
-					<ScrollContainer id="Drive" horizontal="false" vertical="true" height="100%">
+					<ScrollContainer id="Mqtt" horizontal="false" vertical="true" height="100%">
 						
 					</ScrollContainer>
 
 
-					<ScrollContainer id="lok_list" horizontal="false" vertical="true" height="100%">
+					<ScrollContainer id="RSSI" horizontal="false" vertical="true" height="100%">
 						
 					</ScrollContainer>
 
-					<ScrollContainer id="user_list" horizontal="false" vertical="true" height="100%">
+					<ScrollContainer id="TTN" horizontal="false" vertical="true" height="100%">
 						
 					</ScrollContainer>
 
-					<ScrollContainer id="client_list" horizontal="false" vertical="true" height="100%">
+					<ScrollContainer id="Memory" horizontal="false" vertical="true" height="100%">
 					<content>
 					    
 					</content>

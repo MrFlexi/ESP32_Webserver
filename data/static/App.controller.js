@@ -33,21 +33,21 @@ sap.ui.define([
 				expanded: true,
 			},
 			{
-				title: 'LokList',
+				title: 'MQTT-Messages In',
 				icon: 'sap-icon://list',
 				expanded: true,
 				key: 'lok_list'
 			},
 
 			{
-				title: 'User',
+				title: 'UMQTT-Messages Out',
 				icon: 'sap-icon://account',
 				expanded: true,
 				key: 'user_list'
 			},
 
 			{
-				title: 'Clients',
+				title: 'Devices',
 				icon: 'sap-icon://action',
 				expanded: false,
 				items: [{
@@ -60,13 +60,13 @@ sap.ui.define([
 			}, ],
 
 			fixedNavigation: [{
-				title: 'Fixed Item 1',
+				title: 'GPS',
 				icon: 'sap-icon://employee'
 			}, {
-				title: 'Fixed Item 2',
+				title: 'Lora Settings',
 				icon: 'sap-icon://building'
 			}, {
-				title: 'Fixed Item 3',
+				title: 'Battery Management',
 				icon: 'sap-icon://card'
 			}],
 
