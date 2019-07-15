@@ -64,7 +64,7 @@
 				<pages>
 					<ScrollContainer id="Home" horizontal="false" vertical="true" height="100%">
 							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="LoraWan Settings"
-											subheader="" press="press">
+											subheader="{oModelGps>/sensor}" press="press">
 								<TileContent footer="Edit">
 									<ImageContent src="/static/images/trackyard.png" />
 								</TileContent>

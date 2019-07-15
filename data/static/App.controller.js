@@ -15,6 +15,21 @@ sap.ui.define([
 	var oModelUserList          = new sap.ui.model.json.JSONModel();
 	var oModelMainController    = new sap.ui.model.json.JSONModel();
 	var oModelUser              = new sap.ui.model.json.JSONModel();
+	var oModelGps              = new sap.ui.model.json.JSONModel();
+
+	var ws = new WebSocket("ws://192.168.1.228/ws");
+		ws.onopen = function() {                  
+                  // Web Socket is connected, send data using send()
+                  ws.send("Hallo from Server");
+                  alert("Message is sent...");
+			   };
+			   
+			   ws.onmessage = function (evt) { 
+                  var received_msg = evt.data;
+				  alert(received_msg);
+				  var gps_model = jQuery.parseJSON(evt.data)
+                oModelGps.setData(gps_model);
+               };
 
 
 	var CController = Controller.extend("view.App", {
@@ -107,6 +122,7 @@ sap.ui.define([
 			this.getView().setModel(oModelLokList, "LokListModel");
 			this.getView().setModel(oModelUserList, "oModelUserList");
 			this.getView().setModel(oModelMainController, "oModelMainController");
+			this.getView().setModel(oModelGps, "oModelGps");
 
             
 
