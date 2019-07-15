@@ -63,7 +63,7 @@
 			<NavContainer id="pageContainer">
 				<pages>
 					<ScrollContainer id="Home" horizontal="false" vertical="true" height="100%">
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Lora Settings"
+							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="LoraWan Settings"
 											subheader="" press="press">
 								<TileContent footer="Edit">
 									<ImageContent src="/static/images/trackyard.png" />

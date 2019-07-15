@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html>
+
+
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta charset="utf-8">
@@ -9,16 +11,33 @@
 	<meta http-equiv="pragma" content="no-cache" />
 
 	<title>Train Controller 2018-8</title>
-	<script
-		id="sap-ui-bootstrap"
-		src="https://openui5.hana.ondemand.com/resources/sap-ui-core.js"
-		data-sap-ui-theme="sap_belize"
-		data-sap-ui-libs="sap.m"
-		data-sap-ui-compatVersion="edge"
-		data-sap-ui-preload="async"
-		data-sap-ui-resourceroots='{ "view": "/static/" }'>
+	<script id="sap-ui-bootstrap" src="https://openui5.hana.ondemand.com/resources/sap-ui-core.js"
+		data-sap-ui-theme="sap_belize" data-sap-ui-libs="sap.m" data-sap-ui-compatVersion="edge"
+		data-sap-ui-preload="async" data-sap-ui-resourceroots='{ "view": "/static/" }'>
+
+		</script>
+
+	<script>
+		
+		// platformio run --target uploadfs
+
+		var ws = new WebSocket("ws://192.168.43.34/ws");
+		ws.onopen = function() {                  
+                  // Web Socket is connected, send data using send()
+                  ws.send("Hallo from Server");
+                  alert("Message is sent...");
+			   };
+			   
+			   ws.onmessage = function (evt) { 
+                  var received_msg = evt.data;
+                  alert(received_msg);
+               };
+
+
 
 	</script>
+
+
 	<script>
 		sap.ui.getCore().attachInit(function () {
 			sap.ui.xmlview({
@@ -28,6 +47,8 @@
 
 	</script>
 </head>
+
 <body class="sapUiBody" id="content">
 </body>
+
 </html>
