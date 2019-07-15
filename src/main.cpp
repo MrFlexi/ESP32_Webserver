@@ -6,6 +6,9 @@
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
+String JsonStr;
+
+StaticJsonDocument<200> doc;
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -18,7 +21,15 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   case WS_EVT_CONNECT:
   {
     Serial.println("Websocket client connection received");
-    client->text("Hello from ESP32 Server");
+    
+    doc["sensor"] = "gps";
+    doc["time"] = 1351824120;
+    JsonArray data = doc.createNestedArray("data");
+    data.add(48.756080);
+    data.add(2.302038);
+
+    serializeJson(doc, JsonStr);
+    client->text(JsonStr);
   }
   break;
 
