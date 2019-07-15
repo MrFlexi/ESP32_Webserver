@@ -15,7 +15,24 @@ sap.ui.define([
 	var oModelUserList          = new sap.ui.model.json.JSONModel();
 	var oModelMainController    = new sap.ui.model.json.JSONModel();
 	var oModelUser              = new sap.ui.model.json.JSONModel();
+	var oModelGps               = new sap.ui.model.json.JSONModel();
 
+
+
+	var ws = new WebSocket("ws://192.168.43.34/ws");
+	ws.onopen = function() {                  
+		// Web Socket is connected, send data using send()
+		ws.send("Hallo from Client");
+		alert("WS open im controller");
+	 };			 
+
+	ws.onmessage = function (evt) { 
+		var received_msg = evt.data;
+		var gps_model = jQuery.parseJSON(evt.data)
+		oModelGps.setData(gps_model);
+		alert("WS open1 im controller");
+	 };
+		
 
 	var CController = Controller.extend("view.App", {
         model: new sap.ui.model.json.JSONModel(),
@@ -85,21 +102,7 @@ sap.ui.define([
 		onInit: function() {
 
 		    var namespace = '';
-
-            //Storage
-                  jQuery.sap.require("jquery.sap.storage");
-                  var oStorage = jQuery.sap.storage(jQuery.sap.storage.Type.global);
-                  //Check if there is data into the Storage
-                  if (oStorage.get("myLocalData")) {
-                  console.log("Data is from Storage!");
-                  var oDataUser = oStorage.get("myLocalData");
-                  oModelUser.setData(oDataUser);
-                  }
-                  else
-                  {
-
-
-                  }
+            
 
 			// Dynamisches Menü
 			this.model.setData(this.data);
@@ -107,6 +110,9 @@ sap.ui.define([
 			this.getView().setModel(oModelLokList, "LokListModel");
 			this.getView().setModel(oModelUserList, "oModelUserList");
 			this.getView().setModel(oModelMainController, "oModelMainController");
+			this.getView().setModel(oModelGps, "oModelGps");
+
+			
 
             
 

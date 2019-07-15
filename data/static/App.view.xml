@@ -70,7 +70,7 @@
 								</TileContent>
 							</GenericTile>
 
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Data Browser"
+							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{oModelGps>/0/sensor}"
 											subheader="" press="press">
 								<TileContent footer="Last 24h">
 									<ImageContent src="sap-icon://home-share" />
