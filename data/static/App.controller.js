@@ -118,9 +118,9 @@ sap.ui.define([
 
 			ws.onmessage = function (evt) { 
 				alert("WS open2 im controller");				
-				var gps_model = jQuery.parseJSON(evt.data)
-				oModelGps.setData(gps_model);
-				this.getView().setModel(oModelGps, "oModelGps");				
+				//var gps_model = jQuery.parseJSON(evt.data)
+				//oModelGps.setData(gps_model);
+				//this.getView().setModel(oModelGps, "oModelGps");				
 			 };
 
             
