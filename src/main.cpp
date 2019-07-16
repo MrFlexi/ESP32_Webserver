@@ -3,6 +3,8 @@
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
 #include <ArduinoJson.h>
+#include <DNSServer.h>
+#include <WiFiManager.h>
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
