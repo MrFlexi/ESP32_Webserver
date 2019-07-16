@@ -3,17 +3,34 @@
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
 #include <ArduinoJson.h>
-#include <DNSServer.h>
-#include <WiFiManager.h>
+#include <Ticker.h>
+
+
+Ticker alive_ticker;
+
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
+const float alive_msg_intervall = 60;  // 60 seconds
+
+
 String JsonStr;
 
 StaticJsonDocument<200> doc;
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
+
+void alive_msg() {
+    
+    doc["time"] = millis();
+    serializeJson(doc, JsonStr);    
+    //client->text(JsonStr);
+
+    Serial.println("alive ticker");
+  
+}
+
 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
 {
@@ -74,27 +91,17 @@ void setup()
     request->send(SPIFFS, "/index.html", "text/html");
   });
 
-  server.on("/src/bootstrap.bundle.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("bootstrap requested");
-    request->send(SPIFFS, "/src/bootstrap.bundle.min.js", "text/javascript");
-  });
-
-  server.on("/src/jquery-3.3.1.min.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("jquery requested");
-    request->send(SPIFFS, "/src/jquery-3.4.1.min.js", "text/javascript");
-  });
-
-  server.on("/src/bootstrap.min.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-    Serial.println("css requested");
-    request->send(SPIFFS, "/src/bootstrap.min.css", "text/css");
-  });
-
   // Websocket
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
 
   server.begin();
   server.serveStatic("/", SPIFFS, "/");
+
+  // Ticker
+  alive_ticker.attach(alive_msg_intervall, alive_msg);
+
+
 }
 
 void loop() {}
