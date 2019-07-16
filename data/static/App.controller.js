@@ -17,12 +17,7 @@ sap.ui.define([
 	var oModelUser              = new sap.ui.model.json.JSONModel();
 	var oModelGps               = new sap.ui.model.json.JSONModel();
 
-
-	//var ws = new WebSocket('ws://' + document.domain + '/ws');
 	
-
-	
-		
 
 	var CController = Controller.extend("view.App", {
         model: new sap.ui.model.json.JSONModel(),
@@ -106,21 +101,16 @@ sap.ui.define([
 
 			ws.onopen = function() {                  
 				// Web Socket is connected, send data using send()			
-				alert("WS open im controller");
+				// alert("WS open im controller");
 				ws.send("Hallo from Client");
 			 };			 
-		
-			//ws.onmessage = function (evt) { 
-			//	var received_msg = evt.data;
-			//	var gps_model = jQuery.parseJSON(evt.data);		
-			//	alert("WS open1 im controller");
-			// };
+				
 
 			ws.onmessage = function (evt) { 
-				alert("WS open2 im controller");				
-				//var gps_model = jQuery.parseJSON(evt.data)
-				//oModelGps.setData(gps_model);
-				//this.getView().setModel(oModelGps, "oModelGps");				
+				alert("WS open2 im controller" + evt.data);				
+				var gps_model = jQuery.parseJSON(evt.data)
+				oModelGps.setData(gps_model);
+				this.getView().setModel(oModelGps, "oModelGps");				
 			 };
 
             

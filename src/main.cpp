@@ -5,13 +5,13 @@
 #include <ArduinoJson.h>
 #include <Ticker.h>
 
-
 Ticker alive_ticker;
 
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
-const float alive_msg_intervall = 60;  // 60 seconds
+const float alive_msg_intervall = 20;  // 60 seconds
+int roundtrips = 22;
 
 
 String JsonStr;
@@ -22,9 +22,19 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
 void alive_msg() {
-    
-    doc["time"] = millis();
-    serializeJson(doc, JsonStr);        
+    roundtrips++;
+    JsonStr = "";
+    doc.clear();
+
+    //doc["time"] = millis();
+    doc["roundtrips"] = String(roundtrips);
+    doc["sensor"] = "gps";
+    doc["time"] = "10:05";
+    JsonArray data = doc.createNestedArray("data");
+    data.add(48.756080);
+    data.add(2.302038);
+
+    serializeJson(doc, JsonStr);       
     ws.textAll(JsonStr);
     Serial.println("alive ticker");
   
