@@ -19,12 +19,12 @@
 						<OverflowToolbarLayoutData priority="Low"/>
 					</layoutData>
 				</Button>
-				<Button text="View" type="Transparent">
+				<Button text="Hallo" type="Transparent">
 					<layoutData>
 						<OverflowToolbarLayoutData priority="Low"/>
 					</layoutData>
 				</Button>
-				<Button text="Refactor" type="Transparent">
+				<Button text="" type="Transparent">
 					<layoutData>
 						<OverflowToolbarLayoutData priority="Low"/>
 					</layoutData>
@@ -70,7 +70,7 @@
 								</TileContent>
 							</GenericTile>
 
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{oModelGps>/0/sensor}"
+							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{oModelGps>sensor}"
 											subheader="" press="press">
 								<TileContent footer="Last 24h">
 									<ImageContent src="sap-icon://home-share" />
