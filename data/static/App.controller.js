@@ -19,19 +19,9 @@ sap.ui.define([
 
 
 	//var ws = new WebSocket('ws://' + document.domain + '/ws');
-	  var ws = new WebSocket("ws://192.168.43.34/ws");
+	
 
-	ws.onopen = function() {                  
-		// Web Socket is connected, send data using send()
-		ws.send("Hallo from Client");
-		alert("WS open im controller");
-	 };			 
-
-	ws.onmessage = function (evt) { 
-		var received_msg = evt.data;
-		var gps_model = jQuery.parseJSON(evt.data);		
-		alert("WS open1 im controller");
-	 };
+	
 		
 
 	var CController = Controller.extend("view.App", {
@@ -101,7 +91,8 @@ sap.ui.define([
 		},
 		onInit: function() {
 
-		    var namespace = '';
+			var namespace = '';
+			var ws = new WebSocket("ws://192.168.43.34/ws");
             
 
 			// Dynamisches Menü
@@ -112,12 +103,24 @@ sap.ui.define([
 			this.getView().setModel(oModelMainController, "oModelMainController");
 			this.getView().setModel(oModelGps, "oModelGps");
 
+
+			ws.onopen = function() {                  
+				// Web Socket is connected, send data using send()			
+				alert("WS open im controller");
+				ws.send("Hallo from Client");
+			 };			 
+		
+			//ws.onmessage = function (evt) { 
+			//	var received_msg = evt.data;
+			//	var gps_model = jQuery.parseJSON(evt.data);		
+			//	alert("WS open1 im controller");
+			// };
+
 			ws.onmessage = function (evt) { 
-				var received_msg = evt.data;
+				alert("WS open2 im controller");				
 				var gps_model = jQuery.parseJSON(evt.data)
 				oModelGps.setData(gps_model);
-				this.getView().setModel(oModelGps, "oModelGps");
-				alert("WS open2 im controller");
+				this.getView().setModel(oModelGps, "oModelGps");				
 			 };
 
             
