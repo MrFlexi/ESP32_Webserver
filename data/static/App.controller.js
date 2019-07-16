@@ -87,17 +87,26 @@ sap.ui.define([
 		onInit: function() {
 
 			var namespace = '';
-			var ws = new WebSocket("ws://192.168.43.34/ws");
+			//var ws = new WebSocket("ws://192.168.43.34/ws");
+			
+			var ws = new WebSocket("ws://192.168.1.228/ws");
             
 
 			// Dynamisches Menü
-			this.model.setData(this.data);
-			this.getView().setModel(this.model);
+			//this.model.setData(this.data);
+			//this.getView().setModel(this.model);
 			this.getView().setModel(oModelLokList, "LokListModel");
 			this.getView().setModel(oModelUserList, "oModelUserList");
 			this.getView().setModel(oModelMainController, "oModelMainController");
 			this.getView().setModel(oModelGps, "oModelGps");
 
+			var oData = {
+				recipient : {
+				   name : "World"
+				}
+			 };
+			var oModel2 = new JSONModel(oData);
+         	this.getView().setModel(oModel2,"Test");
 
 			ws.onopen = function() {                  
 				// Web Socket is connected, send data using send()			
@@ -109,8 +118,7 @@ sap.ui.define([
 			ws.onmessage = function (evt) { 
 				alert("WS open2 im controller" + evt.data);				
 				var gps_model = jQuery.parseJSON(evt.data)
-				oModelGps.setData(gps_model);
-				this.getView().setModel(oModelGps, "oModelGps");				
+				oModelGps.setData(gps_model);				
 			 };
 
             

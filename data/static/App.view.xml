@@ -66,12 +66,12 @@
 							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="LoraWan Settings"
 											subheader="" press="press">
 								<TileContent footer="Edit">
-									<ImageContent src="/static/images/trackyard.png" />
+									
 								</TileContent>
 							</GenericTile>
 
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{oModelGps>sensor}"
-											subheader="" press="press">
+							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{Test>/recipient/name}"
+											subheader="Hallo" press="press">
 								<TileContent footer="Last 24h">
 									<ImageContent src="sap-icon://home-share" />
 								</TileContent>

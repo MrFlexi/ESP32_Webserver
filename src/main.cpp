@@ -14,7 +14,7 @@ const float alive_msg_intervall = 20;  // 60 seconds
 int roundtrips = 22;
 
 
-String JsonStr;
+
 
 StaticJsonDocument<200> doc;
 
@@ -22,41 +22,29 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
 void alive_msg() {
-    roundtrips++;
-    JsonStr = "";
-    doc.clear();
 
+    String JsonStr;
+
+    roundtrips++;
+    doc.clear();
     //doc["time"] = millis();
     doc["roundtrips"] = String(roundtrips);
     doc["sensor"] = "gps";
     doc["time"] = "10:05";
-    JsonArray data = doc.createNestedArray("data");
-    data.add(48.756080);
-    data.add(2.302038);
-
-    serializeJson(doc, JsonStr);       
+    serializeJson(doc, JsonStr);  
     ws.textAll(JsonStr);
+    
     Serial.println("alive ticker");
+    Serial.println(JsonStr);
   
-}
+} 
 
 
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
   if(type == WS_EVT_CONNECT){
     Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
-    client->printf("Hello Client %u :)", client->id());
     client->ping();
-
-    doc["sensor"] = "gps";
-    doc["time"] = "10:05";
-    JsonArray data = doc.createNestedArray("data");
-    data.add(48.756080);
-    data.add(2.302038);
-
-    serializeJson(doc, JsonStr);
-    client->text(JsonStr);
-
-
+  
   } else if(type == WS_EVT_DISCONNECT){
     Serial.printf("ws[%s][%u] disconnect: %u\n", server->url(), client->id());
   } else if(type == WS_EVT_ERROR){
@@ -84,9 +72,9 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
       Serial.printf("%s\n",msg.c_str());
 
       if(info->opcode == WS_TEXT)
-        client->text("I got your text message");
+        Serial.println("I got your text message");
       else
-        client->binary("I got your binary message");
+        Serial.println("I got your binary message");
     } else {
       //message is comprised of multiple frames or the frame is split into multiple packets
       if(info->index == 0){
