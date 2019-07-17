@@ -63,16 +63,16 @@
 			<NavContainer id="pageContainer">
 				<pages>
 					<ScrollContainer id="Home" horizontal="false" vertical="true" height="100%">
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="LoraWan Settings"
+							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="ESP Alive Ticker"
 											subheader="" press="press">
-								<TileContent footer="Edit">
-									
+								<TileContent unit="Pings" footer="last 24h">
+									<NumericContent scale="M" value="{Terminal>/roundtrips}" valueColor="Good" indicator="Up" withMargin="false" />
 								</TileContent>
 							</GenericTile>
 
 							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{Test>/recipient/name}"
 											subheader="Hallo" press="press">
-								<TileContent footer="Last 24h">
+								<TileContent footer="">
 									<ImageContent src="sap-icon://home-share" />
 								</TileContent>
 							</GenericTile>

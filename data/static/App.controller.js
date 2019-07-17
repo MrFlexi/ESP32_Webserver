@@ -15,12 +15,13 @@ sap.ui.define([
 	var oModelUserList          = new sap.ui.model.json.JSONModel();
 	var oModelMainController    = new sap.ui.model.json.JSONModel();
 	var oModelUser              = new sap.ui.model.json.JSONModel();
-	var oModelGps               = new sap.ui.model.json.JSONModel();
+	var oModelTerminal           = new sap.ui.model.json.JSONModel();
 
+	//var ws =  new WebSocket("ws://192.168.1.228/ws");
 	
-
 	var CController = Controller.extend("view.App", {
-        model: new sap.ui.model.json.JSONModel(),
+		model: new sap.ui.model.json.JSONModel(),
+		
 		data: {
 
 			navigation: [{
@@ -87,18 +88,18 @@ sap.ui.define([
 		onInit: function() {
 
 			var namespace = '';
+			var ws =  new WebSocket("ws://192.168.43.34/ws");
 			//var ws = new WebSocket("ws://192.168.43.34/ws");
-			
-			var ws = new WebSocket("ws://192.168.1.228/ws");
-            
 
+			var oView = this.getView();
+			
 			// Dynamisches Menü
 			//this.model.setData(this.data);
 			//this.getView().setModel(this.model);
 			this.getView().setModel(oModelLokList, "LokListModel");
 			this.getView().setModel(oModelUserList, "oModelUserList");
 			this.getView().setModel(oModelMainController, "oModelMainController");
-			this.getView().setModel(oModelGps, "oModelGps");
+			//this.getView().setModel(oModelGps, "oModelGps");
 
 			var oData = {
 				recipient : {
@@ -108,22 +109,28 @@ sap.ui.define([
 			var oModel2 = new JSONModel(oData);
          	this.getView().setModel(oModel2,"Test");
 
-			ws.onopen = function() {                  
-				// Web Socket is connected, send data using send()			
-				// alert("WS open im controller");
-				ws.send("Hallo from Client");
-			 };			 
-				
-
-			ws.onmessage = function (evt) { 
-				alert("WS open2 im controller" + evt.data);				
-				var gps_model = jQuery.parseJSON(evt.data)
-				oModelGps.setData(gps_model);				
-			 };
+			
+	
+			 ws.onopen = function() {                  
+				 // Web Socket is connected, send data using send()			
+					 alert("WS open im controller");
+				 // ws.send("Hallo from Client");
+			  };	 
+				 
+			 ws.onmessage = function (evt)  { 
+				 //alert("WS open2 im controller" + evt.data);				
+				 var terminal_model = jQuery.parseJSON(evt.data)
+				 oModelTerminal.setData(terminal_model);	
+				 oView.setModel(oModelTerminal,"Terminal");
+						 
+			  };
+		 
 
             
 
 		},
+
+		
 
 		onItemSelect: function(oEvent) {
 			var item = oEvent.getParameter('item');
