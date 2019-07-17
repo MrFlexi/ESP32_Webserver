@@ -113,7 +113,7 @@ sap.ui.define([
 	
 			 ws.onopen = function() {                  
 				 // Web Socket is connected, send data using send()			
-					 alert("WS open im controller");
+				//	 alert("WS open im controller");
 				 // ws.send("Hallo from Client");
 			  };	 
 				 

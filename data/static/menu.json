@@ -1,4 +1,4 @@
-data: {
+{
 
     navigation: [{
         title: 'Home',
@@ -60,3 +60,4 @@ data: {
     }, {
         text: "Help"
     }]
+}
