@@ -1,9 +1,8 @@
-<core:View xmlns:core="sap.ui.core"
-		   xmlns="sap.m"
-		   xmlns:l="sap.ui.layout"
-		   xmlns:tnt="sap.tnt" xmlns:html="http://www.w3.org/1999/xhtml"
-		   height="100%"
-		   controllerName="view.App">
+<core:View xmlns:core="sap.ui.core" 
+	xmlns="sap.m" 
+	xmlns:l="sap.ui.layout" 
+	xmlns:tnt="sap.tnt" 
+	xmlns:html="http://www.w3.org/1999/xhtml" height="100%" controllerName="view.App">
 
 	<tnt:ToolPage id="toolPage">
 		<tnt:header>
@@ -59,51 +58,60 @@
 			</tnt:SideNavigation>
 		</tnt:sideContent>
 		<tnt:mainContents>
-
-			<NavContainer id="pageContainer">
-				<pages>
-					<ScrollContainer id="Home" horizontal="false" vertical="true" height="100%">
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="ESP Alive Ticker"
-											subheader="" press="press">
+			<l:VerticalLayout width="100%" id="layout1">
+				<NavContainer id="pageContainer">
+					<pages>
+						<ScrollContainer id="Home" horizontal="false" vertical="true" height="100%">
+							<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="ESP Alive Ticker" subheader="" press="press">
 								<TileContent unit="Pings" footer="last 24h">
 									<NumericContent scale="M" value="{Terminal>/roundtrips}" valueColor="Good" indicator="Up" withMargin="false" />
 								</TileContent>
 							</GenericTile>
 
-							<GenericTile 	class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{Test>/recipient/name}"
-											subheader="Hallo" press="press">
+							<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="{Test>/recipient/name}" subheader="Hallo" press="press">
 								<TileContent footer="">
 									<ImageContent src="sap-icon://home-share" />
 								</TileContent>
 							</GenericTile>
-					</ScrollContainer>
+						</ScrollContainer>
 
 
-					<ScrollContainer id="Mqtt" horizontal="false" vertical="true" height="100%">
-						
-					</ScrollContainer>
+						<ScrollContainer id="Mqtt" horizontal="false" vertical="true" height="100%">
+
+						</ScrollContainer>
 
 
-					<ScrollContainer id="RSSI" horizontal="false" vertical="true" height="100%">
-						
-					</ScrollContainer>
+						<ScrollContainer id="RSSI" horizontal="false" vertical="true" height="100%">
 
-					<ScrollContainer id="TTN" horizontal="false" vertical="true" height="100%">
-						
-					</ScrollContainer>
+						</ScrollContainer>
 
-					<ScrollContainer id="Memory" horizontal="false" vertical="true" height="100%">
+						<ScrollContainer id="TTN" horizontal="false" vertical="true" height="100%">
+
+						</ScrollContainer>
+
+						<ScrollContainer id="Memory" horizontal="false" vertical="true" height="100%">
+							<content>
+
+							</content>
+						</ScrollContainer>
+
+
+						<ScrollContainer id="root2" horizontal="false" vertical="true" height="100%">
+							<Text text="This is the root page of the second element"/>
+						</ScrollContainer>
+					</pages>
+				</NavContainer>
+
+			</l:VerticalLayout>
+
+			<l:VerticalLayout width="100%" id="layout11">
+				<TileContent footer="August 21, 2013" class="sapUiSmallMargin">
 					<content>
-					    
+						<NewsContent contentText="SAP Unveils Powerful New Player Comparison Tool Exclusively on NFL.com" subheader="SAP News"/>
 					</content>
-					</ScrollContainer>
+				</TileContent>
+			</l:VerticalLayout>
 
-
-					<ScrollContainer id="root2" horizontal="false" vertical="true" height="100%">
-						<Text text="This is the root page of the second element"/>
-					</ScrollContainer>
-				</pages>
-			</NavContainer>
 		</tnt:mainContents>
 	</tnt:ToolPage>
 </core:View>
