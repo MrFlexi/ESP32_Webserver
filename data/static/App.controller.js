@@ -20,71 +20,7 @@ sap.ui.define([
 	//var ws =  new WebSocket("ws://192.168.1.228/ws");
 	
 	var CController = Controller.extend("view.App", {
-		model: new sap.ui.model.json.JSONModel(),
 		
-		data: {
-
-			navigation: [{
-				title: 'Home',
-				icon: 'sap-icon://home',
-				expanded: true,
-				key: 'Home'
-			}, {
-				title: 'Drive',
-				icon: 'sap-icon://cargo-train',
-				key: 'Drive',
-				expanded: true,
-			},
-			{
-				title: 'MQTT-Messages In',
-				icon: 'sap-icon://list',
-				expanded: true,
-				key: 'lok_list'
-			},
-
-			{
-				title: 'UMQTT-Messages Out',
-				icon: 'sap-icon://account',
-				expanded: true,
-				key: 'user_list'
-			},
-
-			{
-				title: 'Devices',
-				icon: 'sap-icon://action',
-				expanded: false,
-				items: [{
-					title: 'Show connected'
-				}, {
-					title: 'Child Item 2'
-				}, {
-					title: 'Child Item 3'
-				}]
-			}, ],
-
-			fixedNavigation: [{
-				title: 'GPS',
-				icon: 'sap-icon://employee'
-			}, {
-				title: 'Lora Settings',
-				icon: 'sap-icon://building'
-			}, {
-				title: 'Battery Management',
-				icon: 'sap-icon://card'
-			}],
-
-			headerItems: [{
-				text: "File"
-			}, {
-				text: "Edit"
-			}, {
-				text: "View"
-			}, {
-				text: "Settings"
-			}, {
-				text: "Help"
-			}]
-		},
 		onInit: function() {
 
 			var namespace = '';
@@ -92,14 +28,16 @@ sap.ui.define([
 			//var ws = new WebSocket("ws://192.168.43.34/ws");
 
 			var oView = this.getView();
+
+			// Dynamisches Menü						
+			var MenuModel = new JSONModel("./static/menu.json");
+			oView.setModel(MenuModel);
 			
-			// Dynamisches Menü
-			//this.model.setData(this.data);
-			//this.getView().setModel(this.model);
+			
 			this.getView().setModel(oModelLokList, "LokListModel");
 			this.getView().setModel(oModelUserList, "oModelUserList");
 			this.getView().setModel(oModelMainController, "oModelMainController");
-			//this.getView().setModel(oModelGps, "oModelGps");
+
 
 			var oData = {
 				recipient : {
@@ -107,9 +45,7 @@ sap.ui.define([
 				}
 			 };
 			var oModel2 = new JSONModel(oData);
-         	this.getView().setModel(oModel2,"Test");
-
-			
+         	this.getView().setModel(oModel2,"Test");			
 	
 			 ws.onopen = function() {                  
 				 // Web Socket is connected, send data using send()			
@@ -124,9 +60,6 @@ sap.ui.define([
 				 oView.setModel(oModelTerminal,"Terminal");
 						 
 			  };
-		 
-
-            
 
 		},
 
@@ -141,42 +74,7 @@ sap.ui.define([
 		onSliderliveChange: function(oEvent) {
 		   
 		},
-
-
-
-
-		handleLocomotionSelectDialogClose: function(oEvent) {
-			var aContexts = oEvent.getParameter("selectedContexts");
-			if (aContexts && aContexts.length) {
-			    var lok_name = aContexts.map(function(oContext) { return oContext.getObject().name; }).join(", ");
-			    var lok_id   = aContexts.map(function(oContext) { return oContext.getObject().id; }).join(", ");
-
-				MessageToast.show("You have chosen " + lok_name + lok_id );
-
-		
-
-			}
-			oEvent.getSource().getBinding("items").filter([]);
-		},
-
-		handleUserSelectDialogClose: function(oEvent) {
-			var aContexts = oEvent.getParameter("selectedContexts");
-			if (aContexts && aContexts.length) {
-			    var user_name = aContexts.map(function(oContext) { return oContext.getObject().user_name; }).join(", ");
-			    var user_id   = aContexts.map(function(oContext) { return oContext.getObject().user_id; }).join(", ");
-
-				MessageToast.show("You are logged in as: " + user_name + "  " + user_id );
-
-				
-
-			}
-		},
-
-
-
-		handleUserNamePress: function(event) {
-
-		},
+	
 
 		onSideNavButtonPress: function() {
 			var viewId = this.getView().getId();

@@ -1,6 +1,5 @@
-{
-
-    navigation: [{
+{   
+	navigation: [{
         title: 'Home',
         icon: 'sap-icon://home',
         expanded: true,
@@ -36,7 +35,8 @@
         }, {
             title: 'Child Item 3'
         }]
-    }, ],
+    } 
+    ],
 
     fixedNavigation: [{
         title: 'GPS',
@@ -47,17 +47,6 @@
     }, {
         title: 'Battery Management',
         icon: 'sap-icon://card'
-    }],
-
-    headerItems: [{
-        text: "File"
-    }, {
-        text: "Edit"
-    }, {
-        text: "View"
-    }, {
-        text: "Settings"
-    }, {
-        text: "Help"
     }]
+    
 }
