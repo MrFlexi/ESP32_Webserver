@@ -1,52 +1,26 @@
-{   
-	navigation: [{
-        title: 'Home',
-        icon: 'sap-icon://home',
-        expanded: true,
-        key: 'Home'
+{  
+	"navigation": [{
+        "title": "Home",
+        "icon": "sap-icon://home",
+        "expanded": true,
+        "key": "Home"
     }, {
-        title: 'Drive',
-        icon: 'sap-icon://cargo-train',
-        key: 'Drive',
-        expanded: true,
-    },
-    {
-        title: 'MQTT-Messages In',
-        icon: 'sap-icon://list',
-        expanded: true,
-        key: 'lok_list'
-    },
-
-    {
-        title: 'UMQTT-Messages Out',
-        icon: 'sap-icon://account',
-        expanded: true,
-        key: 'user_list'
-    },
-
-    {
-        title: 'Devices',
-        icon: 'sap-icon://action',
-        expanded: false,
-        items: [{
-            title: 'Show connected'
-        }, {
-            title: 'Child Item 2'
-        }, {
-            title: 'Child Item 3'
-        }]
-    } 
-    ],
-
-    fixedNavigation: [{
-        title: 'GPS',
-        icon: 'sap-icon://employee'
-    }, {
-        title: 'Lora Settings',
-        icon: 'sap-icon://building'
-    }, {
-        title: 'Battery Management',
-        icon: 'sap-icon://card'
-    }]
+        "title": "Terminal",
+        "icon": "sap-icon://cargo-train",
+        "key": "Terminal",
+        "expanded": true
     
-}
+    }
+	],
+	
+    "fixedNavigation": [{
+        "title": "GPS",
+        "icon": "sap-icon://employee"
+    }, {
+        "title": "Lora Settings",
+        "icon": "sap-icon://building"
+    }, {
+        "title": "Battery Management",
+        "icon": "sap-icon://card"
+    }]
+ } 
