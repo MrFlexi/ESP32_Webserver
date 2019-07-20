@@ -3,45 +3,41 @@
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
 #include <ArduinoJson.h>
-//#include <Ticker.h>
-//Ticker alive_ticker;
-
 
 TaskHandle_t task_alive_msg;
 TaskHandle_t task_cpu_temp;
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
-const float alive_msg_intervall = 20;  // 60 seconds
-int roundtrips = 22;
+const float alive_msg_intervall = 20; // 60 seconds
+int roundtrips = 0;
 
-
-StaticJsonDocument<200> doc;
+StaticJsonDocument<500> doc;
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
- 
-void taskTwo( void * parameter)
+void taskTwo(void *parameter)
 {
- 
-    for( int i = 0;i<10;i++ ){
- 
-        Serial.println("Hello from task 2");
-        delay(1000);
-    }
-    Serial.println("Ending task 2");
-    vTaskDelete( NULL );
- 
+
+  for (int i = 0; i < 10; i++)
+  {
+
+    Serial.println("Hello from task 2");
+    delay(1000);
+  }
+  Serial.println("Ending task 2");
+  vTaskDelete(NULL);
 }
 
-void t_alive_msg( void * parameter)
+void t_alive_msg(void *parameter)
 {
-// Task bound to core 0, Prio 0 =  very low
-    String JsonStr;
+  // Task bound to core 0, Prio 0 =  very low
+  String JsonStr;
+  String text = "Serial output \r\n booting.... \r\n nodejs started";
 
-    for (;;)
-    {
+  for (;;)
+  {
     JsonStr = "";
     roundtrips++;
     Serial.println("alive ticker");
@@ -53,100 +49,135 @@ void t_alive_msg( void * parameter)
     doc["roundtrips"] = String(roundtrips);
     doc["sensor"] = "gps";
     doc["time"] = "10:05";
-    serializeJson(doc, JsonStr);  
-    //ws.textAll(JsonStr);
-    Serial.println(JsonStr);
-    delay(1000);
+    doc["text"] = text;
+    doc["text_time"] = "SA 8:22:01";
+
+    // Add the "feeds" array
+    JsonArray feeds = doc.createNestedArray("text_table");
+
+    for (int i = 0; i < 10; i++)
+    {
+      JsonObject msg = feeds.createNestedObject();
+      msg["Text"] = "Hallo Welt";
+      msg["Date"] = "13.10.1972";
+      feeds.add(msg);
     }
-  
-} 
 
-
-void create_Tasks(){
-
-xTaskCreate(
-                    t_alive_msg,          /* Task function. */
-                    "AliveMessage",        /* String with name of task. */
-                    10000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    0,                /* Priority of the task. */
-                    &task_alive_msg);            /* Task handle. */
- 
- xTaskCreate(
-                    taskTwo,          /* Task function. */
-                    "TaskTwo",        /* String with name of task. */
-                    10000,            /* Stack size in bytes. */
-                    NULL,             /* Parameter passed as input of the task */
-                    1,                /* Priority of the task. */
-                    &task_cpu_temp);            /* Task handle. */
-
+    serializeJson(doc, JsonStr);
+    ws.textAll(JsonStr);
+    serializeJsonPretty(doc, Serial);
+    delay(20000);
+  }
 }
 
+void create_Tasks()
+{
 
+  xTaskCreate(
+      t_alive_msg,      /* Task function. */
+      "AliveMessage",   /* String with name of task. */
+      10000,            /* Stack size in bytes. */
+      NULL,             /* Parameter passed as input of the task */
+      0,                /* Priority of the task. */
+      &task_alive_msg); /* Task handle. */
 
-void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
-  if(type == WS_EVT_CONNECT){
+  xTaskCreate(
+      taskTwo,         /* Task function. */
+      "TaskTwo",       /* String with name of task. */
+      10000,           /* Stack size in bytes. */
+      NULL,            /* Parameter passed as input of the task */
+      1,               /* Priority of the task. */
+      &task_cpu_temp); /* Task handle. */
+}
+
+void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
+{
+  if (type == WS_EVT_CONNECT)
+  {
     Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
     client->ping();
-  
-  } else if(type == WS_EVT_DISCONNECT){
+  }
+  else if (type == WS_EVT_DISCONNECT)
+  {
     Serial.printf("ws[%s][%u] disconnect: %u\n", server->url(), client->id());
-  } else if(type == WS_EVT_ERROR){
-    Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*)arg), (char*)data);
-  } else if(type == WS_EVT_PONG){
-    Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len)?(char*)data:"");
-  } else if(type == WS_EVT_DATA){
-    AwsFrameInfo * info = (AwsFrameInfo*)arg;
+  }
+  else if (type == WS_EVT_ERROR)
+  {
+    Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t *)arg), (char *)data);
+  }
+  else if (type == WS_EVT_PONG)
+  {
+    Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char *)data : "");
+  }
+  else if (type == WS_EVT_DATA)
+  {
+    AwsFrameInfo *info = (AwsFrameInfo *)arg;
     String msg = "";
-    if(info->final && info->index == 0 && info->len == len){
+    if (info->final && info->index == 0 && info->len == len)
+    {
       //the whole message is in a single frame and we got all of it's data
-      Serial.printf("ws[%s][%u] %s-message[%llu]: ", server->url(), client->id(), (info->opcode == WS_TEXT)?"text":"binary", info->len);
+      Serial.printf("ws[%s][%u] %s-message[%llu]: ", server->url(), client->id(), (info->opcode == WS_TEXT) ? "text" : "binary", info->len);
 
-      if(info->opcode == WS_TEXT){
-        for(size_t i=0; i < info->len; i++) {
-          msg += (char) data[i];
-        }
-      } else {
-        char buff[3];
-        for(size_t i=0; i < info->len; i++) {
-          sprintf(buff, "%02x ", (uint8_t) data[i]);
-          msg += buff ;
+      if (info->opcode == WS_TEXT)
+      {
+        for (size_t i = 0; i < info->len; i++)
+        {
+          msg += (char)data[i];
         }
       }
-      Serial.printf("%s\n",msg.c_str());
+      else
+      {
+        char buff[3];
+        for (size_t i = 0; i < info->len; i++)
+        {
+          sprintf(buff, "%02x ", (uint8_t)data[i]);
+          msg += buff;
+        }
+      }
+      Serial.printf("%s\n", msg.c_str());
 
-      if(info->opcode == WS_TEXT)
+      if (info->opcode == WS_TEXT)
         Serial.println("I got your text message");
       else
         Serial.println("I got your binary message");
-    } else {
+    }
+    else
+    {
       //message is comprised of multiple frames or the frame is split into multiple packets
-      if(info->index == 0){
-        if(info->num == 0)
-          Serial.printf("ws[%s][%u] %s-message start\n", server->url(), client->id(), (info->message_opcode == WS_TEXT)?"text":"binary");
+      if (info->index == 0)
+      {
+        if (info->num == 0)
+          Serial.printf("ws[%s][%u] %s-message start\n", server->url(), client->id(), (info->message_opcode == WS_TEXT) ? "text" : "binary");
         Serial.printf("ws[%s][%u] frame[%u] start[%llu]\n", server->url(), client->id(), info->num, info->len);
       }
 
-      Serial.printf("ws[%s][%u] frame[%u] %s[%llu - %llu]: ", server->url(), client->id(), info->num, (info->message_opcode == WS_TEXT)?"text":"binary", info->index, info->index + len);
+      Serial.printf("ws[%s][%u] frame[%u] %s[%llu - %llu]: ", server->url(), client->id(), info->num, (info->message_opcode == WS_TEXT) ? "text" : "binary", info->index, info->index + len);
 
-      if(info->opcode == WS_TEXT){
-        for(size_t i=0; i < len; i++) {
-          msg += (char) data[i];
-        }
-      } else {
-        char buff[3];
-        for(size_t i=0; i < len; i++) {
-          sprintf(buff, "%02x ", (uint8_t) data[i]);
-          msg += buff ;
+      if (info->opcode == WS_TEXT)
+      {
+        for (size_t i = 0; i < len; i++)
+        {
+          msg += (char)data[i];
         }
       }
-      Serial.printf("%s\n",msg.c_str());
+      else
+      {
+        char buff[3];
+        for (size_t i = 0; i < len; i++)
+        {
+          sprintf(buff, "%02x ", (uint8_t)data[i]);
+          msg += buff;
+        }
+      }
+      Serial.printf("%s\n", msg.c_str());
 
-      if((info->index + len) == info->len){
+      if ((info->index + len) == info->len)
+      {
         Serial.printf("ws[%s][%u] frame[%u] end[%llu]\n", server->url(), client->id(), info->num, info->len);
-        if(info->final){
-          Serial.printf("ws[%s][%u] %s-message end\n", server->url(), client->id(), (info->message_opcode == WS_TEXT)?"text":"binary");
-          if(info->message_opcode == WS_TEXT)
+        if (info->final)
+        {
+          Serial.printf("ws[%s][%u] %s-message end\n", server->url(), client->id(), (info->message_opcode == WS_TEXT) ? "text" : "binary");
+          if (info->message_opcode == WS_TEXT)
             client->text("I got your text message");
           else
             client->binary("I got your binary message");
@@ -156,11 +187,9 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
   }
 }
 
-
-
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   create_Tasks();
 
   if (!SPIFFS.begin())
@@ -190,11 +219,6 @@ void setup()
 
   server.begin();
   server.serveStatic("/", SPIFFS, "/");
-
-  // Ticker
-  // alive_ticker.attach(alive_msg_intervall, alive_msg);
-
-
 }
 
 void loop() {}

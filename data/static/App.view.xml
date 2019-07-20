@@ -74,10 +74,23 @@
 								</TileContent>
 							</GenericTile>
 						</ScrollContainer>
-
-
-						<ScrollContainer id="Mqtt" horizontal="false" vertical="true" height="100%">
-
+						
+						<ScrollContainer id="Terminal" horizontal="false" vertical="true" height="100%">
+							<l:VerticalLayout	class="sapUiContentPadding" width="100%">
+								<l:content>
+									<List headerText="Serial Monitor"	items="{path: 'Terminal>/text_table'}" >
+										<FeedListItem
+											sender="{Terminal>Author}"
+											iconDensityAware="false"
+											info="{Terminal>Type}"
+											timestamp="{Terminal>Date}"
+											text="{Terminal>Text}"
+											convertLinksToAnchorTags="All">
+										</FeedListItem>
+									</List>
+								</l:content>
+	
+			</l:VerticalLayout>
 						</ScrollContainer>
 
 
@@ -104,13 +117,8 @@
 
 			</l:VerticalLayout>
 
-			<l:VerticalLayout width="100%" id="layout11">
-				<TileContent footer="August 21, 2013" class="sapUiSmallMargin">
-					<content>
-						<NewsContent contentText="SAP Unveils Powerful New Player Comparison Tool Exclusively on NFL.com" subheader="SAP News"/>
-					</content>
-				</TileContent>
-			</l:VerticalLayout>
+		
+			
 
 		</tnt:mainContents>
 	</tnt:ToolPage>
