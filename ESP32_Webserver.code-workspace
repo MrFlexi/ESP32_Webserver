@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "D:\\Jochen\\Projekte\\Arduino\\Sketches\\LoraWan\\ESP32-Paxcounter-master\\ESP32-Paxcounter-master"
+		},
+		{
+			"name": "ESP32_Webserver",
+			"path": "."
+		}
+	],
+	"settings": {
+		"terminal.integrated.env.windows": {
+			"PATH": "C:\\Users\\Jogi\\.platformio\\penv\\Scripts;C:\\Users\\Jogi\\.platformio\\penv;C:\\Program Files\\Python36\\Scripts\\;C:\\Program Files\\Python36\\;C:\\Python27\\;C:\\Python27\\Scripts;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files (x86)\\Microchip\\xc8\\v1.37\\bin;D:\\Jochen\\Projekte\\tensorflow\\protoc\\bin;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Yarn\\bin\\;C:\\Program Files\\nodejs\\;C:\\Program Files\\Git\\cmd;C:\\Users\\Jogi\\AppData\\Local\\atom\\bin;C:\\Users\\Jogi\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\Jogi\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\Jogi\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\Jogi\\AppData\\Local\\Yarn\\bin;C:\\Users\\Jogi\\AppData\\Roaming\\npm;C:\\Users\\Jogi\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\Jogi\\AppData\\Local\\Programs\\Git\\cmd;C:\\Program Files\\Python36\\Scripts\\;C:\\Program Files\\Python36\\;C:\\Python27\\;C:\\Python27\\Scripts;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files (x86)\\Microchip\\xc8\\v1.37\\bin;D:\\Jochen\\Projekte\\tensorflow\\protoc\\bin;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Yarn\\bin\\;C:\\Program Files\\nodejs\\;C:\\Program Files\\Git\\cmd;C:\\Users\\Jogi\\AppData\\Local\\atom\\bin;C:\\Users\\Jogi\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\Jogi\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\Jogi\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\Jogi\\AppData\\Local\\Yarn\\bin;C:\\Users\\Jogi\\AppData\\Roaming\\npm;C:\\Users\\Jogi\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\Jogi\\AppData\\Local\\Programs\\Git\\cmd",
+			"PLATFORMIO_CALLER": "vscode"
+		}
+	}
+}

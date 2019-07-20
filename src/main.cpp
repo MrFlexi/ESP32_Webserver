@@ -3,10 +3,12 @@
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
 #include <ArduinoJson.h>
-#include <Ticker.h>
+//#include <Ticker.h>
+//Ticker alive_ticker;
 
-Ticker alive_ticker;
 
+TaskHandle_t task_alive_msg;
+TaskHandle_t task_cpu_temp;
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
@@ -14,30 +16,72 @@ const float alive_msg_intervall = 20;  // 60 seconds
 int roundtrips = 22;
 
 
-
-
 StaticJsonDocument<200> doc;
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-void alive_msg() {
+ 
+void taskTwo( void * parameter)
+{
+ 
+    for( int i = 0;i<10;i++ ){
+ 
+        Serial.println("Hello from task 2");
+        delay(1000);
+    }
+    Serial.println("Ending task 2");
+    vTaskDelete( NULL );
+ 
+}
 
+void t_alive_msg( void * parameter)
+{
+// Task bound to core 0, Prio 0 =  very low
     String JsonStr;
 
+    for (;;)
+    {
+    JsonStr = "";
     roundtrips++;
+    Serial.println("alive ticker");
+    Serial.print("running on core: ");
+    Serial.println(xPortGetCoreID());
+
     doc.clear();
     //doc["time"] = millis();
     doc["roundtrips"] = String(roundtrips);
     doc["sensor"] = "gps";
     doc["time"] = "10:05";
     serializeJson(doc, JsonStr);  
-    ws.textAll(JsonStr);
-    
-    Serial.println("alive ticker");
+    //ws.textAll(JsonStr);
     Serial.println(JsonStr);
+    delay(1000);
+    }
   
 } 
+
+
+void create_Tasks(){
+
+xTaskCreate(
+                    t_alive_msg,          /* Task function. */
+                    "AliveMessage",        /* String with name of task. */
+                    10000,            /* Stack size in bytes. */
+                    NULL,             /* Parameter passed as input of the task */
+                    0,                /* Priority of the task. */
+                    &task_alive_msg);            /* Task handle. */
+ 
+ xTaskCreate(
+                    taskTwo,          /* Task function. */
+                    "TaskTwo",        /* String with name of task. */
+                    10000,            /* Stack size in bytes. */
+                    NULL,             /* Parameter passed as input of the task */
+                    1,                /* Priority of the task. */
+                    &task_cpu_temp);            /* Task handle. */
+
+}
+
 
 
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
@@ -117,6 +161,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 void setup()
 {
   Serial.begin(9600);
+  create_Tasks();
 
   if (!SPIFFS.begin())
   {
@@ -147,7 +192,7 @@ void setup()
   server.serveStatic("/", SPIFFS, "/");
 
   // Ticker
-  alive_ticker.attach(alive_msg_intervall, alive_msg);
+  // alive_ticker.attach(alive_msg_intervall, alive_msg);
 
 
 }
