@@ -73,20 +73,26 @@
 									<ImageContent src="sap-icon://home-share" />
 								</TileContent>
 							</GenericTile>
+
+							<GenericTile class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="CPU Temp" subheader="" press="press">
+								<TileContent unit="Celsius" footer="">
+									<NumericContent scale="M" value="{Terminal>/temperatur}" valueColor="Good" indicator="Up" withMargin="false" />
+								</TileContent>
+							</GenericTile>
 						</ScrollContainer>
 						
 						<ScrollContainer id="Terminal" horizontal="false" vertical="true" height="100%">
 							<l:VerticalLayout	class="sapUiContentPadding" width="100%">
 								<l:content>
 									<List headerText="Serial Monitor"	items="{path: 'Terminal>/text_table'}" >
-										<FeedListItem
-											sender="{Terminal>Author}"
-											iconDensityAware="false"
-											info="{Terminal>Type}"
-											timestamp="{Terminal>Date}"
-											text="{Terminal>Text}"
-											convertLinksToAnchorTags="All">
-										</FeedListItem>
+										
+										<NotificationListItem
+											priority="{Terminal>Priority}"
+											datetime="{Terminal>Date}"
+											title="{Terminal>Title}"
+											description="{Terminal>Description}"
+											>
+										</NotificationListItem>
 									</List>
 								</l:content>
 	
