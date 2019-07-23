@@ -4,81 +4,53 @@
 #include "ESPAsyncWebServer.h"
 #include <ArduinoJson.h>
 #include "esp_system.h"
+#include "webserver.h"
 
+//-----------------------------------------------------------------------
+// RTOS
+//-----------------------------------------------------------------------
 TaskHandle_t task_alive_msg;
 TaskHandle_t task_cpu_temp;
 TaskHandle_t task_broadcast_message;
+QueueHandle_t queue;
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
 const float alive_msg_intervall = 20; // 60 seconds
 int roundtrips = 0;
+int queueSize = 10;
 
-StaticJsonDocument<500> doc;
+
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-extern "C" {
-uint8_t temprature_sens_read();
+extern "C"
+{
+  uint8_t temprature_sens_read();
 }
 
-typedef struct {
-  int roundtrips;
-  float temperatur;
-  int32_t latitude;
-  int32_t longitude;
-} message_buffer_t;
+
 
 message_buffer_t gs_message_buffer;
+message_buffer_t gs_message_queue_out;
 
 void t_cpu_temp(void *parameter)
 {
 
   for (;;)
   {
-  //get internal temp of ESP32
-  uint8_t temp_farenheit= temprature_sens_read();
-  //convert farenheit to celcius
-  gs_message_buffer.temperatur = ( temp_farenheit - 32 ) / 1.8;
-  
-  Serial.print("internal temp [°C]: ");
-  Serial.println(gs_message_buffer.temperatur);
+    //get internal temp of ESP32
+    uint8_t temp_farenheit = temprature_sens_read();
+    //convert farenheit to celcius
+    gs_message_buffer.temperatur = (temp_farenheit - 32) / 1.8;
+
+    Serial.print("internal temp [°C]: ");
+    Serial.println(gs_message_buffer.temperatur);
     delay(60000);
-  } 
+  }
 }
 
-
-String message_buffer_to_jsonstr( void )
-{
-    String JsonStr;
-    doc.clear();
-    
-    doc["roundtrips"] = String(gs_message_buffer.roundtrips );
-    doc["sensor"] = "gps";
-    doc["time"] = "10:05";
-    doc["text"] = "Hallo Welt";
-    doc["text_time"] = "SA 8:22:01";
-
-    doc["temperatur"] = String(gs_message_buffer.temperatur );
-
-
-    // Add the "feeds" array
-    JsonArray feeds = doc.createNestedArray("text_table");
-
-    for (int i = 0; i < 1; i++)
-    {
-      JsonObject msg = feeds.createNestedObject();
-      msg["Title"] = "Hallo Welt";
-      msg["Description"] = "400m Schwimmen in 4 Minuten";
-      msg["Date"] = "13.10.1972";
-      msg["Priority"] = "High";
-      feeds.add(msg);
-    }
-    serializeJson(doc, JsonStr);
-    serializeJsonPretty(doc, Serial);
-    return JsonStr;
-}
 
 void t_alive_msg(void *parameter)
 {
@@ -96,7 +68,6 @@ void t_alive_msg(void *parameter)
 
     gs_message_buffer.roundtrips = roundtrips;
 
-    
     serializeJson(doc, JsonStr);
     ws.textAll(JsonStr);
     serializeJsonPretty(doc, Serial);
@@ -111,7 +82,7 @@ void t_broadcast_message(void *parameter)
 
   for (;;)
   {
-    JsonStr = message_buffer_to_jsonstr();
+    JsonStr = message_buffer_to_jsonstr(gs_message_buffer);
     ws.textAll(JsonStr);
     delay(10000);
   }
@@ -122,10 +93,10 @@ void create_Tasks()
 
   xTaskCreate(
       t_broadcast_message,      /* Task function. */
-      "Broadcast Message",   /* String with name of task. */
-      10000,            /* Stack size in bytes. */
-      NULL,             /* Parameter passed as input of the task */
-      10,                /* Priority of the task. */
+      "Broadcast Message",      /* String with name of task. */
+      10000,                    /* Stack size in bytes. */
+      NULL,                     /* Parameter passed as input of the task */
+      10,                       /* Priority of the task. */
       &task_broadcast_message); /* Task handle. */
 
   xTaskCreate(
@@ -137,7 +108,7 @@ void create_Tasks()
       &task_alive_msg); /* Task handle. */
 
   xTaskCreate(
-      t_cpu_temp,         /* Task function. */
+      t_cpu_temp,      /* Task function. */
       "CPUTemp",       /* String with name of task. */
       10000,           /* Stack size in bytes. */
       NULL,            /* Parameter passed as input of the task */
@@ -245,14 +216,48 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 void setup()
 {
   Serial.begin(115200);
+
+  // RTOS Initialisation
+  queue = xQueueCreate(queueSize, sizeof(message_buffer_t));
+  if (queue == NULL)
+  {
+    Serial.println("Error creating the queue");
+  }
+
+  gs_message_buffer.roundtrips = 1;
+  gs_message_buffer.temperatur = 150;
+  xQueueSend(queue, &gs_message_buffer, portMAX_DELAY);
+
+  gs_message_buffer.roundtrips = 2;
+  gs_message_buffer.temperatur = 200;
+  xQueueSend(queue, &gs_message_buffer, portMAX_DELAY);
+
+  if (queue != NULL)
+  {
+
+    int messagesWaiting = uxQueueMessagesWaiting(queue);
+    Serial.print("Messages waiting: "); Serial.println(messagesWaiting);
+
+    for (int i = 0; i < messagesWaiting; i++)
+    {
+
+      xQueueReceive(queue, &gs_message_queue_out, portMAX_DELAY);
+      Serial.print(gs_message_queue_out.roundtrips);
+      Serial.print("|");
+      Serial.println(gs_message_queue_out.temperatur);
+    }
+  }
+
   create_Tasks();
 
+  // External File System Initialisation
   if (!SPIFFS.begin())
   {
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
   }
 
+  // WIFI Setup
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED)
