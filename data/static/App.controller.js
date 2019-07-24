@@ -17,7 +17,8 @@ sap.ui.define([
 	var oModelUser              = new sap.ui.model.json.JSONModel();
 	var oModelTerminal           = new sap.ui.model.json.JSONModel();
 
-	//var ws =  new WebSocket("ws://192.168.1.228/ws");
+	var ws =  new WebSocket("ws://192.168.43.34/ws");
+   //var ws = new WebSocket("ws://192.168.43.34/ws");
 	
 	var CController = Controller.extend("view.App", {
 		
@@ -69,6 +70,12 @@ sap.ui.define([
 			var item = oEvent.getParameter('item');
 			var viewId = this.getView().getId();
 			sap.ui.getCore().byId(viewId + "--pageContainer").to(viewId + "--" + item.getKey());
+		},
+
+		onButtonLedPressed: function (oEvent) {
+			alert("LED toggled");
+			ws.send("Hallo from Client");
+			
 		},
 
 		onSliderliveChange: function(oEvent) {

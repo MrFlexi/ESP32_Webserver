@@ -95,13 +95,15 @@ void t_broadcast_message(void *parameter)
     {
 
       int messagesWaiting = uxQueueMessagesWaiting(queue);
-      Serial.print("Messages waiting: ");
-      Serial.println(messagesWaiting);
+    
 
       gs_message_buffer.error_msg_count = messagesWaiting;
 
       if (messagesWaiting > 0)
       {
+        
+        Serial.print("Messages waiting: ");
+        Serial.println(messagesWaiting);
         sendMessage = true;
 
         for (int i = 0; i < messagesWaiting; i++)

@@ -79,6 +79,14 @@
 									<NumericContent scale="M" value="{Terminal>/temperatur}" valueColor="Good" indicator="Up" withMargin="false" />
 								</TileContent>
 							</GenericTile>
+
+							<GenericTile id = "Tile_LED" class="sapUiTinyMarginBegin sapUiTinyMarginTop tileLayout" header="Make some Light" subheader="Toggel LED!" press="onButtonLedPressed">
+								<TileContent footer="off">
+									<ImageContent src="sap-icon://lightbulb"/>
+								</TileContent>
+						</GenericTile>
+
+
 						</ScrollContainer>
 						
 						<ScrollContainer id="Terminal" horizontal="false" vertical="true" height="100%">
