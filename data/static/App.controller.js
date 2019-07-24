@@ -17,16 +17,18 @@ sap.ui.define([
 	var oModelUser              = new sap.ui.model.json.JSONModel();
 	var oModelTerminal           = new sap.ui.model.json.JSONModel();
 
-	var ws =  new WebSocket("ws://192.168.43.34/ws");
-   //var ws = new WebSocket("ws://192.168.43.34/ws");
+
 	
 	var CController = Controller.extend("view.App", {
+
+		//ws:WebSocket("ws://192.168.43.34/ws"),
+		//var ws = new WebSocket("ws://192.168.43.34/ws");
 		
 		onInit: function() {
 
 			var namespace = '';
 			var ws =  new WebSocket("ws://192.168.43.34/ws");
-			//var ws = new WebSocket("ws://192.168.43.34/ws");
+			
 
 			var oView = this.getView();
 
@@ -46,25 +48,25 @@ sap.ui.define([
 				}
 			 };
 			var oModel2 = new JSONModel(oData);
-         	this.getView().setModel(oModel2,"Test");			
+			this.getView().setModel(oModel2,"Test");	
+			 
+			ws.onopen = function() {                  
+				// Web Socket is connected, send data using send()			
+			   //	 alert("WS open im controller");
+				// ws.send("Hallo from Client");
+			 };	 
+				
+			ws.onmessage = function (evt)  { 
+				//alert("WS open2 im controller" + evt.data);				
+				var terminal_model = jQuery.parseJSON(evt.data)
+				oModelTerminal.setData(terminal_model);	
+				oView.setModel(oModelTerminal,"Terminal");
+						
+			 }; 
 	
-			 ws.onopen = function() {                  
-				 // Web Socket is connected, send data using send()			
-				//	 alert("WS open im controller");
-				 // ws.send("Hallo from Client");
-			  };	 
-				 
-			 ws.onmessage = function (evt)  { 
-				 //alert("WS open2 im controller" + evt.data);				
-				 var terminal_model = jQuery.parseJSON(evt.data)
-				 oModelTerminal.setData(terminal_model);	
-				 oView.setModel(oModelTerminal,"Terminal");
-						 
-			  };
-
+			 
 		},
-
-		
+				
 
 		onItemSelect: function(oEvent) {
 			var item = oEvent.getParameter('item');

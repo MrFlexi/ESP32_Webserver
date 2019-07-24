@@ -41,21 +41,17 @@ String message_buffer_to_jsonstr(message_buffer_t message_buffer, error_message_
 
   // Add the "feeds" array
   JsonArray feeds = doc.createNestedArray("text_table");
-
-  Serial.println("46");
+  
 
   for (int i = 0; i < message_buffer.error_msg_count; i++)
   {
     JsonObject msg = feeds.createNestedObject();
     msg["Title"] = error_tab[i].title;
-    Serial.println("52");
     //msg["Description"] = "400m Schwimmen in 4 Minuten";
     //msg["Date"] = "13.10.1972";
     msg["Priority"] = error_tab[i].priority;
-    feeds.add(msg);
-    Serial.println("57");
-  }
-  Serial.println("59");
+    feeds.add(msg);    
+  }  
   serializeJson(doc, JsonStr);
   serializeJsonPretty(doc, Serial);
   return JsonStr;
