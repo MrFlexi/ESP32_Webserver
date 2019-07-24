@@ -30,6 +30,7 @@ extern "C"
 }
 
 message_buffer_t gs_message_buffer;
+message_buffer_t gs_message_buffer_old;
 message_buffer_t gs_message_queue_out;
 
 error_message_t gs_error_message;
@@ -76,9 +77,20 @@ void t_broadcast_message(void *parameter)
   error_message_t error_message;
 
   String JsonStr;
+  bool sendMessage = false;
 
   for (;;)
   {
+    
+    // Check if values have been changed
+    if ( gs_message_buffer.temperatur != gs_message_buffer_old.temperatur or
+        gs_message_buffer.roundtrips != gs_message_buffer_old.roundtrips )
+    {
+     gs_message_buffer_old =  gs_message_buffer;
+     sendMessage = true;
+    }
+    
+    // Check if there is a new queue entry to display in terminal
     if (queue != NULL)
     {
 
@@ -86,11 +98,12 @@ void t_broadcast_message(void *parameter)
       Serial.print("Messages waiting: ");
       Serial.println(messagesWaiting);
 
-     gs_message_buffer.error_msg_count = messagesWaiting; 
+      gs_message_buffer.error_msg_count = messagesWaiting;
 
       if (messagesWaiting > 0)
       {
-        
+        sendMessage = true;
+
         for (int i = 0; i < messagesWaiting; i++)
         {
 
@@ -101,16 +114,20 @@ void t_broadcast_message(void *parameter)
 
           // Put into array
           error_tab[i].priority = error_message.priority;
-          error_tab[i].title     = error_message.title;
-
+          error_tab[i].title = error_message.title;
         }
       }
-        
-      JsonStr = message_buffer_to_jsonstr(gs_message_buffer, error_tab);
-      ws.textAll(JsonStr);
+
+      // Send message via Websocket to connected clients
+      if (sendMessage)
+      {
+        JsonStr = message_buffer_to_jsonstr(gs_message_buffer, error_tab);
+        ws.textAll(JsonStr);
+        sendMessage = false;
+      }
     }
 
-    delay(10000);
+    delay(100);
   }
 }
 
@@ -161,7 +178,6 @@ void setup()
   gs_error_message.title = "Lora Data received";
   xQueueSend(queue, &gs_error_message, portMAX_DELAY);
 
-  
   create_Tasks();
 
   // External File System Initialisation
