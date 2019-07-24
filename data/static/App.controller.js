@@ -17,17 +17,18 @@ sap.ui.define([
 	var oModelUser              = new sap.ui.model.json.JSONModel();
 	var oModelTerminal           = new sap.ui.model.json.JSONModel();
 
+	var ws = new WebSocket("ws://192.168.43.34/ws");
+
 
 	
 	var CController = Controller.extend("view.App", {
 
-		//ws:WebSocket("ws://192.168.43.34/ws"),
-		//var ws = new WebSocket("ws://192.168.43.34/ws");
+		//ws:WebSocket("ws://192.168.43.34/ws"),		
 		
 		onInit: function() {
 
 			var namespace = '';
-			var ws =  new WebSocket("ws://192.168.43.34/ws");
+			//var ws =  new WebSocket("ws://192.168.43.34/ws");
 			
 
 			var oView = this.getView();
