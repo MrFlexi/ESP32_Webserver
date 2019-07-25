@@ -18,10 +18,16 @@
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
-Adafruit_BME280 bme; // I2C
-//Adafruit_BME280 bme(BME_CS); // hardware SPI
-//Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
 
+//Onboard OLE Display
+//Pin 4 = SDA (ist nicht der Standard-I2C-Port vom ESP32)
+//Pin 15 = SCL (ist nicht der Standard-I2C-Port vom ESP32)
+//Pin 16 = RST (muss bei Start kurz auf Low, dann auf High gesetzt werden)
+
+//U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 15, /* data=*/ 4, /* reset=*/ 16);
+
+
+Adafruit_BME280 bme; // I2C   PIN 21 + 22
 
 //-----------------------------------------------------------------------
 // RTOS
@@ -183,7 +189,17 @@ void setup_sensors()
   Serial.println(F("BME280 test")); 
      unsigned status; 
      
-     status = bme.begin();   
+     
+    // https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/issues/62
+
+    bool wire_status = Wire1.begin(21, 22);
+    if(!wire_status)
+    {
+      Serial.println("Could not finitialize Wire1"); 
+    }
+
+
+     status = bme.begin(0x76, &Wire1);  
      if (!status) { 
          Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!"); 
          Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16); 
