@@ -21,7 +21,7 @@ typedef struct
 } message_buffer_t;
 
  extern error_message_t* error_tab = new error_message_t[10];
- 
+
  extern message_buffer_t gs_message_buffer;
  extern message_buffer_t gs_message_buffer_old;
  extern message_buffer_t gs_message_queue_out;
@@ -30,7 +30,14 @@ typedef struct
 
  extern error_message_t gs_error_message;
 
-
+#define U8LOG_WIDTH 64
+#define U8LOG_HEIGHT 4
+#define SUN	0
+#define SUN_CLOUD  1
+#define CLOUD 2
+#define RAIN 3
+#define THUNDER 4
+#define SLEEP 10
 
 
 #endif

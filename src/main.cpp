@@ -11,6 +11,7 @@
 #include "tasks.h"
 #include <Wire.h>
 #include <SPI.h>
+#include <U8g2lib.h>
 
 #include "globals.h"
 
@@ -20,6 +21,22 @@
 #include "ESPAsyncWebServer.h"
 #include "webserver.h"
 #endif
+
+//--------------------------------------------------------------------------
+// U8G2 Display Setup
+//--------------------------------------------------------------------------
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ SCL, /* data=*/ SDA);   // ESP32 Thing, HW I2C with pin remapping
+// Create a U8g2log object
+U8G2LOG u8g2log;
+
+// assume 4x6 font, define width and height
+#define U8LOG_WIDTH 32
+#define U8LOG_HEIGHT 6
+
+// allocate memory
+uint8_t u8log_buffer[U8LOG_WIDTH * U8LOG_HEIGHT];
+
+
 
 #if (USE_WEBSOCKET)
 #include "ESPAsyncWebServer.h"
@@ -162,6 +179,17 @@ void create_Tasks()
 }
 
 
+void setup_display(void)
+{
+  u8g2.begin();
+  u8g2.setFont(u8g2_font_profont12_mf);                         // set the font for the terminal window
+  u8g2log.begin(u8g2, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer); // connect to u8g2, assign buffer
+  u8g2log.setLineHeightOffset(0);                               // set extra space between lines in pixel, this can be negative
+  u8g2log.setRedrawMode(0);                                     // 0: Update screen with newline, 1: Update screen for every char
+  u8g2log.print("Display loaded...");
+  u8g2log.print("\n");
+}
+
 void setup_sensors()
 {
 
@@ -171,14 +199,15 @@ void setup_sensors()
      
     // https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/issues/62
 
-    bool wire_status = Wire1.begin( GPIO_NUM_4, GPIO_NUM_15);
-    if(!wire_status)
-    {
-      Serial.println("Could not finitialize Wire1"); 
-    }
+    //bool wire_status = Wire1.begin( GPIO_NUM_4, GPIO_NUM_15);
+    //if(!wire_status)
+    //{
+    //  Serial.println("Could not finitialize Wire1"); 
+    //}
 
 
      status = bme.begin(0x76, &Wire1);  
+     status = bme.begin(0x76); 
      if (!status) { 
          Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!"); 
          Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16); 
@@ -219,6 +248,7 @@ void setup()
   
   
   setup_sensors();
+  setup_display();
 
   // RTOS Initialisation
   queue = xQueueCreate(queueSize, sizeof(error_message_t));
