@@ -6,6 +6,90 @@ StaticJsonDocument<500> doc;
 static const char TAG[] = __FILE__;
 
 
+typedef struct
+{
+  String title;
+  String description;
+  String date;
+  String priority;
+    
+} error_message_t;
+
+
+typedef struct
+{
+  int roundtrips;
+  float temperatur;
+  int32_t latitude;
+  int32_t longitude;
+  int error_msg_count;  
+} message_buffer_t;
+
+ error_message_t* error_tab = new error_message_t[10];
+
+
+void t_broadcast_message(void *parameter)
+{
+  // Task bound to core 0, Prio 0 =  very low
+
+  error_message_t error_message;
+
+  String JsonStr;
+  bool sendMessage = false;
+
+  for (;;)
+  {
+    
+    // Check if values have been changed
+    if ( gs_message_buffer.temperatur != gs_message_buffer_old.temperatur or
+        gs_message_buffer.roundtrips != gs_message_buffer_old.roundtrips )
+    {
+     gs_message_buffer_old =  gs_message_buffer;
+     sendMessage = true;
+    }
+    
+    // Check if there is a new queue entry to display in terminal
+    if (queue != NULL)
+    {
+
+      int messagesWaiting = uxQueueMessagesWaiting(queue);
+    
+
+      gs_message_buffer.error_msg_count = messagesWaiting;
+
+      if (messagesWaiting > 0)
+      {
+        
+        Serial.print("Messages waiting: ");
+        Serial.println(messagesWaiting);
+        sendMessage = true;
+
+        for (int i = 0; i < messagesWaiting; i++)
+        {
+
+          xQueueReceive(queue, &error_message, portMAX_DELAY);
+          Serial.print(error_message.priority);
+          Serial.print("|");
+          Serial.println(error_message.title);
+
+          // Put into array
+          error_tab[i].priority = error_message.priority;
+          error_tab[i].title = error_message.title;
+        }
+      }
+
+      // Send message via Websocket to connected clients
+      if (sendMessage)
+      {
+        JsonStr = message_buffer_to_jsonstr(gs_message_buffer, error_tab);
+        ws.textAll(JsonStr);
+        sendMessage = false;
+      }
+    }
+
+    delay(100);
+  }
+}
 
 
 

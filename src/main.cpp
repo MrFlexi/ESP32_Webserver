@@ -1,10 +1,21 @@
 #include <Arduino.h>
 #include "WiFi.h"
+
+#if (USE_WEBSERVER)
 #include "SPIFFS.h"
 #include "ESPAsyncWebServer.h"
+#include "webserver.h"
+#endif
+
+#if (USE_WEBSOCKET)
+#include "ESPAsyncWebServer.h"
+#include "websocket.h"
+#endif
+
+
 #include <ArduinoJson.h>
 #include "esp_system.h"
-#include "webserver.h"
+
 #include "tasks.h"
 #include <Wire.h>
 #include <SPI.h>
@@ -29,6 +40,9 @@
 
 Adafruit_BME280 bme; // I2C   PIN 21 + 22
 
+// local Tag for logging
+static const char TAG[] = __FILE__;
+
 //-----------------------------------------------------------------------
 // RTOS
 //-----------------------------------------------------------------------
@@ -43,8 +57,37 @@ const float alive_msg_intervall = 20; // 60 seconds
 int roundtrips = 0;
 int queueSize = 10;
 
+
+
+typedef struct
+{
+  String title;
+  String description;
+  String date;
+  String priority;
+    
+} error_message_t;
+
+
+typedef struct
+{
+  int roundtrips;
+  float temperatur;
+  int32_t latitude;
+  int32_t longitude;
+  int error_msg_count;  
+} message_buffer_t;
+
+ error_message_t* error_tab = new error_message_t[10];
+
+
+#if (USE_WEBSERVER)
 AsyncWebServer server(80);
+#endif
+
+#if (USE_WEBSOCKET)
 AsyncWebSocket ws("/ws");
+#endif
 
 extern "C"
 {
@@ -54,7 +97,6 @@ extern "C"
 message_buffer_t gs_message_buffer;
 message_buffer_t gs_message_buffer_old;
 message_buffer_t gs_message_queue_out;
-
 error_message_t gs_error_message;
 
 void t_cpu_temp(void *parameter)
@@ -92,72 +134,12 @@ void t_alive_msg(void *parameter)
   }
 }
 
-void t_broadcast_message(void *parameter)
-{
-  // Task bound to core 0, Prio 0 =  very low
 
-  error_message_t error_message;
-
-  String JsonStr;
-  bool sendMessage = false;
-
-  for (;;)
-  {
-    
-    // Check if values have been changed
-    if ( gs_message_buffer.temperatur != gs_message_buffer_old.temperatur or
-        gs_message_buffer.roundtrips != gs_message_buffer_old.roundtrips )
-    {
-     gs_message_buffer_old =  gs_message_buffer;
-     sendMessage = true;
-    }
-    
-    // Check if there is a new queue entry to display in terminal
-    if (queue != NULL)
-    {
-
-      int messagesWaiting = uxQueueMessagesWaiting(queue);
-    
-
-      gs_message_buffer.error_msg_count = messagesWaiting;
-
-      if (messagesWaiting > 0)
-      {
-        
-        Serial.print("Messages waiting: ");
-        Serial.println(messagesWaiting);
-        sendMessage = true;
-
-        for (int i = 0; i < messagesWaiting; i++)
-        {
-
-          xQueueReceive(queue, &error_message, portMAX_DELAY);
-          Serial.print(error_message.priority);
-          Serial.print("|");
-          Serial.println(error_message.title);
-
-          // Put into array
-          error_tab[i].priority = error_message.priority;
-          error_tab[i].title = error_message.title;
-        }
-      }
-
-      // Send message via Websocket to connected clients
-      if (sendMessage)
-      {
-        JsonStr = message_buffer_to_jsonstr(gs_message_buffer, error_tab);
-        ws.textAll(JsonStr);
-        sendMessage = false;
-      }
-    }
-
-    delay(100);
-  }
-}
 
 void create_Tasks()
 {
 
+#if (USE_WEBSOCKET)
   xTaskCreate(
       t_broadcast_message,      /* Task function. */
       "Broadcast Message",      /* String with name of task. */
@@ -165,6 +147,7 @@ void create_Tasks()
       NULL,                     /* Parameter passed as input of the task */
       10,                       /* Priority of the task. */
       &task_broadcast_message); /* Task handle. */
+#endif      
 
   xTaskCreate(
       t_alive_msg,      /* Task function. */
@@ -186,13 +169,14 @@ void create_Tasks()
 
 void setup_sensors()
 {
-  Serial.println(F("BME280 test")); 
-     unsigned status; 
-     
+
+ #if (HAS_BME280) 
+  ESP_LOGI(TAG, "BME280 Setup...");   
+     unsigned status;      
      
     // https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/issues/62
 
-    bool wire_status = Wire1.begin(21, 22);
+    bool wire_status = Wire1.begin( HAS_BME280 );
     if(!wire_status)
     {
       Serial.println("Could not finitialize Wire1"); 
@@ -224,6 +208,8 @@ void setup_sensors()
      Serial.print(bme.readHumidity()); 
      Serial.println(" %");  
      Serial.println(); 
+#endif
+
   }
 
 
@@ -232,6 +218,9 @@ void setup_sensors()
 
 void setup()
 {
+  
+  ESP_LOGI(TAG, "Starting..."); 
+  
   Serial.begin(115200);
   setup_sensors();
 
@@ -252,13 +241,17 @@ void setup()
 
   create_Tasks();
 
+  #if (USE_WEBSERVER) 
   // External File System Initialisation
   if (!SPIFFS.begin())
   {
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
   }
+  #endif
 
+
+#if (USE_WIFI) 
   // WIFI Setup
   WiFi.begin(ssid, password);
 
@@ -269,18 +262,23 @@ void setup()
   }
 
   Serial.println(WiFi.localIP());
+#endif
 
+#if (USE_WEBSERVER)
   server.on("/index", HTTP_GET, [](AsyncWebServerRequest *request) {
     Serial.println("Index requested");
     request->send(SPIFFS, "/index.html", "text/html");
   });
+  server.begin();
+  server.serveStatic("/", SPIFFS, "/");
+#endif
 
+#if (USE_WEBSOCKET)
   // Websocket
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
+#endif  
 
-  server.begin();
-  server.serveStatic("/", SPIFFS, "/");
 }
 
 void loop() {}
