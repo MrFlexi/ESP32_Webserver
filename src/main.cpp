@@ -1,6 +1,7 @@
 #define USE_WEBSERVER   1
 #define USE_WEBSOCKET   1
-#define USE_WIFI         1
+#define USE_WIFI        1
+#define USE_BME280      1
 
 
 
@@ -164,13 +165,13 @@ void create_Tasks()
 void setup_sensors()
 {
 
- #if (HAS_BME280) 
+ #if (USE_BME280) 
   ESP_LOGI(TAG, "BME280 Setup...");   
      unsigned status;      
      
     // https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/issues/62
 
-    bool wire_status = Wire1.begin( HAS_BME280 );
+    bool wire_status = Wire1.begin( GPIO_NUM_4, GPIO_NUM_15);
     if(!wire_status)
     {
       Serial.println("Could not finitialize Wire1"); 
@@ -213,6 +214,7 @@ void setup_sensors()
 void setup()
 {
   Serial.begin(115200);
+  delay(1000);
   ESP_LOGI(TAG, "Starting..."); 
   
   
