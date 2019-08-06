@@ -1,32 +1,43 @@
-#ifndef _WEBSERVER_H
-#define _WEBSERVER_H
+#ifndef _WEBSOCKET_H
+#define _WEBSOCKET_H
+
+#include <ArduinoJson.h>
 
 StaticJsonDocument<500> doc;
 // local Tag for logging
-static const char TAG[] = __FILE__;
 
+ extern AsyncWebSocket ws;
 
-typedef struct
+String message_buffer_to_jsonstr(message_buffer_t message_buffer, error_message_t  error_tab[])
 {
-  String title;
-  String description;
-  String date;
-  String priority;
-    
-} error_message_t;
+  String JsonStr;
+  doc.clear();
 
+  doc["roundtrips"] = String( message_buffer.roundtrips);
+  doc["sensor"] = "gps";
+  doc["time"] = "10:05";
+  doc["text"] = "Hallo Welt";
+  doc["text_time"] = "SA 8:22:01";
 
-typedef struct
-{
-  int roundtrips;
-  float temperatur;
-  int32_t latitude;
-  int32_t longitude;
-  int error_msg_count;  
-} message_buffer_t;
+  doc["temperatur"] = String( message_buffer.temperatur);
 
- error_message_t* error_tab = new error_message_t[10];
+  // Add the "feeds" array
+  JsonArray feeds = doc.createNestedArray("text_table");
+  
 
+  for (int i = 0; i < message_buffer.error_msg_count; i++)
+  {
+    JsonObject msg = feeds.createNestedObject();
+    msg["Title"] = error_tab[i].title;
+    //msg["Description"] = "400m Schwimmen in 4 Minuten";
+    //msg["Date"] = "13.10.1972";
+    msg["Priority"] = error_tab[i].priority;
+    feeds.add(msg);    
+  }  
+  serializeJson(doc, JsonStr);
+  serializeJsonPretty(doc, Serial);
+  return JsonStr;
+}
 
 void t_broadcast_message(void *parameter)
 {
@@ -81,8 +92,8 @@ void t_broadcast_message(void *parameter)
       // Send message via Websocket to connected clients
       if (sendMessage)
       {
-        JsonStr = message_buffer_to_jsonstr(gs_message_buffer, error_tab);
-        ws.textAll(JsonStr);
+        //JsonStr = message_buffer_to_jsonstr(gs_message_buffer, error_tab);
+        //ws.textAll(JsonStr);
         sendMessage = false;
       }
     }
@@ -93,36 +104,7 @@ void t_broadcast_message(void *parameter)
 
 
 
-String message_buffer_to_jsonstr(message_buffer_t message_buffer, error_message_t  error_tab[])
-{
-  String JsonStr;
-  doc.clear();
 
-  doc["roundtrips"] = String( message_buffer.roundtrips);
-  doc["sensor"] = "gps";
-  doc["time"] = "10:05";
-  doc["text"] = "Hallo Welt";
-  doc["text_time"] = "SA 8:22:01";
-
-  doc["temperatur"] = String( message_buffer.temperatur);
-
-  // Add the "feeds" array
-  JsonArray feeds = doc.createNestedArray("text_table");
-  
-
-  for (int i = 0; i < message_buffer.error_msg_count; i++)
-  {
-    JsonObject msg = feeds.createNestedObject();
-    msg["Title"] = error_tab[i].title;
-    //msg["Description"] = "400m Schwimmen in 4 Minuten";
-    //msg["Date"] = "13.10.1972";
-    msg["Priority"] = error_tab[i].priority;
-    feeds.add(msg);    
-  }  
-  serializeJson(doc, JsonStr);
-  serializeJsonPretty(doc, Serial);
-  return JsonStr;
-}
 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
 {

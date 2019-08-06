@@ -1,5 +1,18 @@
+#define USE_WEBSERVER   1
+#define USE_WEBSOCKET   1
+#define USE_WIFI         1
+
+
+
 #include <Arduino.h>
 #include "WiFi.h"
+#include "esp_system.h"
+#include "tasks.h"
+#include <Wire.h>
+#include <SPI.h>
+
+#include "globals.h"
+
 
 #if (USE_WEBSERVER)
 #include "SPIFFS.h"
@@ -14,13 +27,11 @@
 
 
 #include <ArduinoJson.h>
-#include "esp_system.h"
 
-#include "tasks.h"
-#include <Wire.h>
-#include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+
+
 
 #define BME_SCK 13
 #define BME_MISO 12
@@ -49,36 +60,23 @@ static const char TAG[] = __FILE__;
 TaskHandle_t task_alive_msg;
 TaskHandle_t task_cpu_temp;
 TaskHandle_t task_broadcast_message;
-QueueHandle_t queue;
+
+int queueSize = 10;
 
 const char *ssid = "MrFlexi";
 const char *password = "Linde-123";
 const float alive_msg_intervall = 20; // 60 seconds
 int roundtrips = 0;
-int queueSize = 10;
+
+// Global Variables - Definition checked against declaration */
+message_buffer_t gs_message_buffer;
+message_buffer_t gs_message_buffer_old;
+message_buffer_t gs_message_queue_out;
+QueueHandle_t queue;
+error_message_t gs_error_message;
 
 
 
-typedef struct
-{
-  String title;
-  String description;
-  String date;
-  String priority;
-    
-} error_message_t;
-
-
-typedef struct
-{
-  int roundtrips;
-  float temperatur;
-  int32_t latitude;
-  int32_t longitude;
-  int error_msg_count;  
-} message_buffer_t;
-
- error_message_t* error_tab = new error_message_t[10];
 
 
 #if (USE_WEBSERVER)
@@ -94,10 +92,6 @@ extern "C"
   uint8_t temprature_sens_read();
 }
 
-message_buffer_t gs_message_buffer;
-message_buffer_t gs_message_buffer_old;
-message_buffer_t gs_message_queue_out;
-error_message_t gs_error_message;
 
 void t_cpu_temp(void *parameter)
 {
@@ -218,17 +212,17 @@ void setup_sensors()
 
 void setup()
 {
-  
+  Serial.begin(115200);
   ESP_LOGI(TAG, "Starting..."); 
   
-  Serial.begin(115200);
+  
   setup_sensors();
 
   // RTOS Initialisation
   queue = xQueueCreate(queueSize, sizeof(error_message_t));
   if (queue == NULL)
   {
-    Serial.println("Error creating the queue");
+    ESP_LOGE(TAG, "Error creating the queue"); 
   }
 
   gs_error_message.priority = "High";
@@ -281,4 +275,6 @@ void setup()
 
 }
 
-void loop() {}
+void loop() {
+
+}
