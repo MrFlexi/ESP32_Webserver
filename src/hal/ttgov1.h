@@ -18,18 +18,25 @@
 //#define GPS_INT GPIO_NUM_13 // 30ns accurary timepulse, to be external wired o
 
 
-#define HAS_BME280 GPIO_NUM_21, GPIO_NUM_22 // SDA, SCL
+#define HAS_BME280 GPIO_NUM_21, GPIO_NUM_13 // SDA, SCL
 
+//---------------------------------------------------------------------------------------------------
+// Onboard OLE Display
+//---------------------------------------------------------------------------------------------------
+//Pin 4 = SDA (ist nicht der Standard-I2C-Port vom ESP32)
+//Pin 15 = SCL (ist nicht der Standard-I2C-Port vom ESP32)
+//Pin 16 = RST (muss bei Start kurz auf Low, dann auf High gesetzt werden)
 #define HAS_DISPLAY U8X8_SSD1306_128X64_NONAME_HW_I2C // OLED-Display on board
+#define OLED_SDA (4)
+#define OLED_SCL (15)
+#define OLED_RST (16)
 //#define DISPLAY_FLIP  1 // uncomment this for rotated display
+
+
 #define HAS_LED LED_BUILTIN
 #define LED_ACTIVE_LOW 1  // Onboard LED is active when pin is LOW
 #define HAS_BUTTON KEY_BUILTIN
 
-// Pins for I2C interface of OLED Display
-#define MY_OLED_SDA (4)
-#define MY_OLED_SCL (15)
-#define MY_OLED_RST (16)
 
 // Pins for LORA chip SPI interface come from board file, we need some
 // additional definitions for LMIC
