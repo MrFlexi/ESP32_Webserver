@@ -1,6 +1,8 @@
 #ifndef _GLOBALS_H
 #define _GLOBALS_H
 
+#include "hal/ttgobeam.h"
+
 typedef struct
 {
   String title;

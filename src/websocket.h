@@ -93,7 +93,7 @@ void t_broadcast_message(void *parameter)
       if (sendMessage)
       {
         //JsonStr = message_buffer_to_jsonstr(gs_message_buffer, error_tab);
-        //ws.textAll(JsonStr);
+        ws.textAll(JsonStr);
         sendMessage = false;
       }
     }

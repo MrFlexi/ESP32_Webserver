@@ -1,11 +1,7 @@
-#define USE_WEBSERVER   0
-#define USE_WEBSOCKET   0
-<<<<<<< HEAD
-#define USE_WIFI        0
-=======
+#define USE_WEBSERVER   1
+#define USE_WEBSOCKET   1
 #define USE_WIFI        1
->>>>>>> 20d3315a5bc9ed1c246e47c3efc4ab83ee7b8226
-#define USE_BME280      1
+#define USE_BME280      0
 
 #include <Arduino.h>
 #include "WiFi.h"
@@ -65,20 +61,11 @@ uint8_t u8log_buffer[U8LOG_WIDTH * U8LOG_HEIGHT];
 #endif
 
 
-
-
 #define SEALEVELPRESSURE_HPA (1013.25)
 
-
-//Onboard OLE Display
-//Pin 4 = SDA (ist nicht der Standard-I2C-Port vom ESP32)
-//Pin 15 = SCL (ist nicht der Standard-I2C-Port vom ESP32)
-//Pin 16 = RST (muss bei Start kurz auf Low, dann auf High gesetzt werden)
-
-//U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 15, /* data=*/ 4, /* reset=*/ 16);
-
-
+#if (USE_BME280)
 Adafruit_BME280 bme; // I2C   PIN 21 + 22
+#endif
 
 // local Tag for logging
 static const char TAG[] = __FILE__;
@@ -105,9 +92,6 @@ QueueHandle_t queue;
 error_message_t gs_error_message;
 
 
-
-
-
 #if (USE_WEBSERVER)
 AsyncWebServer server(80);
 #endif
@@ -127,6 +111,7 @@ void t_sensors(void *parameter)
 
   for (;;)
   {
+    #if (USE_BME280)
     //get internal temp of ESP32
     uint8_t temp_farenheit = temprature_sens_read();
     //convert farenheit to celcius
@@ -150,7 +135,8 @@ void t_sensors(void *parameter)
      Serial.print(bme.readHumidity()); 
      Serial.println(" %");  
      Serial.println(); 
-    delay(10000);
+     #endif
+    delay(20000);
   }
 }
 
@@ -196,6 +182,7 @@ void create_Tasks()
       0,                /* Priority of the task. */
       &task_alive_msg); /* Task handle. */
 
+#if (USE_BME280)
   xTaskCreate(
       t_sensors,      /* Task function. */
       "Sensors",       /* String with name of task. */
@@ -203,6 +190,7 @@ void create_Tasks()
       NULL,            /* Parameter passed as input of the task */
       0,               /* Priority of the task. */
       &task_sensors); /* Task handle. */
+#endif
 }
 
 
@@ -518,5 +506,5 @@ display_chip_info();
 }
 
 void loop() {
-
+delay(10);
 }

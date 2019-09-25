@@ -35,9 +35,9 @@
 
 // display (if connected)
 #define HAS_DISPLAY U8X8_SSD1306_128X64_NONAME_HW_I2C
-#define MY_OLED_SDA SDA
-#define MY_OLED_SCL SCL
-#define MY_OLED_RST U8X8_PIN_NONE
+#define OLED_SDA SDA
+#define OLED_SCL SCL
+#define OLED_RST U8X8_PIN_NONE
 //#define DISPLAY_FLIP  1 // use if display is rotated
 
 // user defined sensors (if connected)
