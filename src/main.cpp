@@ -1,6 +1,6 @@
-#define USE_WEBSERVER   1
-#define USE_WEBSOCKET   1
-#define USE_WIFI        1
+#define USE_WEBSERVER   0
+#define USE_WEBSOCKET   0
+#define USE_WIFI        0
 #define USE_BME280      1
 
 
