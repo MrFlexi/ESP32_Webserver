@@ -1,9 +1,11 @@
 #define USE_WEBSERVER   0
 #define USE_WEBSOCKET   0
+<<<<<<< HEAD
 #define USE_WIFI        0
+=======
+#define USE_WIFI        1
+>>>>>>> 20d3315a5bc9ed1c246e47c3efc4ab83ee7b8226
 #define USE_BME280      1
-
-
 
 #include <Arduino.h>
 #include "WiFi.h"
@@ -12,6 +14,8 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <U8g2lib.h>
+#include <ArduinoJson.h>
+#include <esp_spi_flash.h> // needed for reading ESP32 chip attributes
 
 #include "globals.h"
 
@@ -22,10 +26,22 @@
 #include "webserver.h"
 #endif
 
+#define SUN	0
+#define SUN_CLOUD  1
+#define CLOUD 2
+#define RAIN 3
+#define THUNDER 4
+#define SLEEP 10
+
+
 //--------------------------------------------------------------------------
 // U8G2 Display Setup
 //--------------------------------------------------------------------------
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ SCL, /* data=*/ SDA);   // ESP32 Thing, HW I2C with pin remapping
+//U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ OLED_SCL, /* data=*/ OLED_SDA);   // ESP32 Thing, HW I2C with pin remapping
+
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ OLED_RST, /* clock=*/ OLED_SCL, /* data=*/ OLED_SDA);   // ESP32 Thing, HW I2C with pin remapping
+
+
 // Create a U8g2log object
 U8G2LOG u8g2log;
 
@@ -37,24 +53,19 @@ U8G2LOG u8g2log;
 uint8_t u8log_buffer[U8LOG_WIDTH * U8LOG_HEIGHT];
 
 
-
 #if (USE_WEBSOCKET)
 #include "ESPAsyncWebServer.h"
 #include "websocket.h"
 #endif
 
 
-#include <ArduinoJson.h>
-
+#if (USE_BME280)
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#endif
 
 
 
-#define BME_SCK 13
-#define BME_MISO 12
-#define BME_MOSI 11
-#define BME_CS 10
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
@@ -76,7 +87,7 @@ static const char TAG[] = __FILE__;
 // RTOS
 //-----------------------------------------------------------------------
 TaskHandle_t task_alive_msg;
-TaskHandle_t task_cpu_temp;
+TaskHandle_t task_sensors;
 TaskHandle_t task_broadcast_message;
 
 int queueSize = 10;
@@ -111,7 +122,7 @@ extern "C"
 }
 
 
-void t_cpu_temp(void *parameter)
+void t_sensors(void *parameter)
 {
 
   for (;;)
@@ -121,9 +132,25 @@ void t_cpu_temp(void *parameter)
     //convert farenheit to celcius
     gs_message_buffer.temperatur = (temp_farenheit - 32) / 1.8;
 
-    Serial.print("internal temp [°C]: ");
+    Serial.print("CPU temp [°C]: ");
     Serial.println(gs_message_buffer.temperatur);
-    delay(60000);
+
+
+     Serial.println(); 
+     Serial.print("Temp [°C]: "); 
+     Serial.print(bme.readTemperature()); 
+     Serial.println();
+     Serial.print("Pressure = "); 
+     Serial.print(bme.readPressure() / 100.0F); 
+     Serial.println(" hPa");   
+     Serial.print("Approx. Altitude = "); 
+     Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA)); 
+     Serial.println(" m");   
+     Serial.print("Humidity = "); 
+     Serial.print(bme.readHumidity()); 
+     Serial.println(" %");  
+     Serial.println(); 
+    delay(10000);
   }
 }
 
@@ -170,13 +197,169 @@ void create_Tasks()
       &task_alive_msg); /* Task handle. */
 
   xTaskCreate(
-      t_cpu_temp,      /* Task function. */
-      "CPUTemp",       /* String with name of task. */
+      t_sensors,      /* Task function. */
+      "Sensors",       /* String with name of task. */
       10000,           /* Stack size in bytes. */
       NULL,            /* Parameter passed as input of the task */
       0,               /* Priority of the task. */
-      &task_cpu_temp); /* Task handle. */
+      &task_sensors); /* Task handle. */
 }
+
+
+
+void drawScrollString(int16_t offset, const char *s)
+{
+  static char buf[36];	// should for screen with up to 256 pixel width 
+  size_t len;
+  size_t char_offset = 0;
+  u8g2_uint_t dx = 0;
+  size_t visible = 0;
+  len = strlen(s);
+  if ( offset < 0 )
+  {
+    char_offset = (-offset)/8;
+    dx = offset + char_offset*8;
+    if ( char_offset >= u8g2.getDisplayWidth()/8 )
+      return;
+    visible = u8g2.getDisplayWidth()/8-char_offset+1;
+    strncpy(buf, s, visible);
+    buf[visible] = '\0';
+    u8g2.setFont(u8g2_font_8x13_mf);
+    u8g2.drawStr(char_offset*8-dx, 62, buf);
+  }
+  else
+  {
+    char_offset = offset / 8;
+    if ( char_offset >= len )
+      return;	// nothing visible
+    dx = offset - char_offset*8;
+    visible = len - char_offset;
+    if ( visible > u8g2.getDisplayWidth()/8+1 )
+      visible = u8g2.getDisplayWidth()/8+1;
+    strncpy(buf, s+char_offset, visible);
+    buf[visible] = '\0';
+    u8g2.setFont(u8g2_font_8x13_mf);
+    u8g2.drawStr(-dx, 62, buf);
+  }
+  
+}
+
+
+void drawSymbol(u8g2_uint_t x, u8g2_uint_t y, uint8_t symbol)
+{
+  // fonts used:
+  // u8g2_font_open_iconic_embedded_6x_t
+  // u8g2_font_open_iconic_weather_6x_t
+  // encoding values, see: https://github.com/olikraus/u8g2/wiki/fntgrpiconic
+  
+  switch(symbol)
+  {
+    case SUN:
+      u8g2.setFont(u8g2_font_open_iconic_weather_6x_t);
+      u8g2.drawGlyph(x, y, 69);	
+      break;
+    case SUN_CLOUD:
+      u8g2.setFont(u8g2_font_open_iconic_weather_6x_t);
+      u8g2.drawGlyph(x, y, 65);	
+      break;
+    case CLOUD:
+      u8g2.setFont(u8g2_font_open_iconic_weather_6x_t);
+      u8g2.drawGlyph(x, y, 64);	
+      break;
+    case RAIN:
+      u8g2.setFont(u8g2_font_open_iconic_weather_6x_t);
+      u8g2.drawGlyph(x, y, 67);	
+      break;    
+    case THUNDER:
+      u8g2.setFont(u8g2_font_open_iconic_embedded_6x_t);
+      u8g2.drawGlyph(x, y, 67);
+      break;
+   case SLEEP:
+      u8g2.setFont( u8g2_font_open_iconic_all_8x_t);
+      u8g2.drawGlyph(x, y, 67);  
+      break;         
+  }
+}
+
+void drawWeather(uint8_t symbol, int degree)
+{
+  drawSymbol(0, 48, symbol);
+  u8g2.setFont(u8g2_font_logisoso32_tf);
+  u8g2.setCursor(48+3, 42);
+  u8g2.print(degree);
+  u8g2.print("°C");		// requires enableUTF8Print()
+}
+
+void drawRawValue(uint8_t symbol, int degree, int voltage)
+{
+  Serial.print("drawRawValue");
+  u8g2.firstPage();
+  drawSymbol(0, 48, symbol);
+  u8g2.setFont(u8g2_font_logisoso16_tf);
+  u8g2.setCursor(48+3, 20);
+  u8g2.print(degree);u8g2.print(" °");
+  u8g2.print("");	
+  
+  u8g2.setCursor(48+3, 42);
+  u8g2.print(voltage);u8g2.print(" V");
+  u8g2.print("");	
+
+  while ( u8g2.nextPage() );
+  delay(10);
+}
+
+
+void draw(const char *s, uint8_t symbol, int degree)
+{
+  int16_t offset = -(int16_t)u8g2.getDisplayWidth();
+  int16_t len = strlen(s);
+  for(;;)
+  {
+    u8g2.firstPage();
+    do {
+      drawWeather(symbol, degree);
+      drawScrollString(offset, s);
+    } while ( u8g2.nextPage() );
+    delay(5);
+    offset+=2;
+    if ( offset > len*8+1 )
+      break;
+  }
+}
+
+
+
+
+
+void print_wakeup_reason()
+{
+  esp_sleep_wakeup_cause_t wakeup_reason;
+
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+
+  switch (wakeup_reason)
+  {
+    case ESP_SLEEP_WAKEUP_EXT0:
+      Serial.println("Wakeup caused by external signal using RTC_IO");
+      break;
+    case ESP_SLEEP_WAKEUP_EXT1:
+      Serial.println("Wakeup caused by external signal using RTC_CNTL");
+      break;
+    case ESP_SLEEP_WAKEUP_TIMER:
+      Serial.println("Wakeup caused by timer");
+      break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD:
+      Serial.println("Wakeup caused by touchpad");
+      break;
+    case ESP_SLEEP_WAKEUP_ULP:
+      Serial.println("Wakeup caused by ULP program");
+      break;
+    default:
+      Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
+      break;
+  }
+}
+
 
 
 void setup_display(void)
@@ -194,20 +377,26 @@ void setup_sensors()
 {
 
  #if (USE_BME280) 
-  ESP_LOGI(TAG, "BME280 Setup...");   
+  ESP_LOGI(TAG, "BME280 Setup..."); 
+
+  u8g2log.print("BME280 Setup...");
+  u8g2log.print("\n");
+
      unsigned status;      
      
     // https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/issues/62
 
-    //bool wire_status = Wire1.begin( GPIO_NUM_4, GPIO_NUM_15);
-    //if(!wire_status)
-    //{
-    //  Serial.println("Could not finitialize Wire1"); 
-    //}
+    bool wire_status = Wire1.begin( GPIO_NUM_21, GPIO_NUM_13);
+    if(!wire_status)
+    {
+      ESP_LOGE(TAG, "I2C Wire1 error");; 
+      u8g2log.print("Wire1 error");
+      u8g2log.print("\n");
+    }
 
 
      status = bme.begin(0x76, &Wire1);  
-     status = bme.begin(0x76); 
+     //status = bme.begin(0x76); 
      if (!status) { 
          Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!"); 
          Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16); 
@@ -216,41 +405,53 @@ void setup_sensors()
          Serial.print("        ID of 0x60 represents a BME 280.\n"); 
          Serial.print("        ID of 0x61 represents a BME 680.\n"); 
          while (1); 
-     } 
+     }     
      
-     Serial.println(); 
-     Serial.print("Temperature = "); 
-     Serial.print(bme.readTemperature()); 
-     Serial.println(" *C");  
-     Serial.print("Pressure = "); 
-     Serial.print(bme.readPressure() / 100.0F); 
-     Serial.println(" hPa");   
-     Serial.print("Approx. Altitude = "); 
-     Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA)); 
-     Serial.println(" m");   
-     Serial.print("Humidity = "); 
-     Serial.print(bme.readHumidity()); 
-     Serial.println(" %");  
-     Serial.println(); 
 #endif
 
   }
 
+void DisplayKey(const uint8_t *key, uint8_t len, bool lsb) {
+  const uint8_t *p;
+  for (uint8_t i = 0; i < len; i++) {
+    p = lsb ? key + len - i - 1 : key + i;
+    u8g2.printf("%02X", *p);
+  }
+  u8g2.printf("\n");
+}
 
+void display_chip_info()
+{
+    esp_chip_info_t chip_info;
+
+    esp_chip_info(&chip_info);
+    u8g2.printf("ESP32 %d cores\nWiFi%s%s\n", chip_info.cores,
+                (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
+                (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
+    u8g2.printf("ESP Rev.%d\n", chip_info.revision);
+    u8g2.printf("%dMB %s Flash\n", spi_flash_get_chip_size() / (1024 * 1024),
+                (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "int."
+                                                              : "ext.");
+
+
+}
 
 
 
 void setup()
 {
   Serial.begin(115200);
+  esp_log_level_set("*", ESP_LOG_VERBOSE);
+
   delay(1000);
   ESP_LOGI(TAG, "Starting..."); 
   
-  
+  setup_display();    
   setup_sensors();
-  setup_display();
+
 
   // RTOS Initialisation
+  ESP_LOGI(TAG, "creating RTOS Queue"); 
   queue = xQueueCreate(queueSize, sizeof(error_message_t));
   if (queue == NULL)
   {
@@ -265,13 +466,16 @@ void setup()
   gs_error_message.title = "Lora Data received";
   xQueueSend(queue, &gs_error_message, portMAX_DELAY);
 
+
+  ESP_LOGI(TAG, "creating RTOS Tasks"); 
   create_Tasks();
 
   #if (USE_WEBSERVER) 
+  ESP_LOGI(TAG, "Mounting SPIFF Filesystem"); 
   // External File System Initialisation
   if (!SPIFFS.begin())
   {
-    Serial.println("An Error has occurred while mounting SPIFFS");
+    ESP_LOGE(TAG, "An Error has occurred while mounting SPIFFS");     
     return;
   }
   #endif
@@ -284,10 +488,11 @@ void setup()
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(1000);
-    Serial.println("Connecting to WiFi..");
+      ESP_LOGI(TAG, "Connecting to WiFi..");    
   }
 
-  Serial.println(WiFi.localIP());
+  ESP_LOGI(TAG, WiFi.localIP() );  
+  
 #endif
 
 #if (USE_WEBSERVER)
@@ -304,6 +509,11 @@ void setup()
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
 #endif  
+
+
+draw("Moving solar panel", SUN, 0);
+display_chip_info();
+
 
 }
 
