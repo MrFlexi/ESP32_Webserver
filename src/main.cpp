@@ -1,7 +1,8 @@
-#define USE_WEBSERVER   1
-#define USE_WEBSOCKET   1
+#define USE_WEBSERVER   0
+#define USE_WEBSOCKET   0
 #define USE_WIFI        1
 #define USE_BME280      0
+#define USE_MQTT        1
 
 #include <Arduino.h>
 #include "WiFi.h"
@@ -31,12 +32,38 @@
 
 
 //--------------------------------------------------------------------------
+// MQTT
+//--------------------------------------------------------------------------
+
+
+#if (USE_MQTT)
+#include <PubSubClient.h>
+#endif
+//const char *mqtt_server = "192.168.1.144"; // Laptop
+//const char *mqtt_server = "test.mosquitto.org"; // Laptop
+const char *mqtt_server = "192.168.1.100"; // Raspberry
+const char *mqtt_topic = "mrflexi/solarserver/";
+
+#if (USE_MQTT)
+PubSubClient client(Wifi);
+long lastMsgAlive = 0;
+long lastMsgDist = 0;
+#endif
+
+
+//--------------------------------------------------------------------------
+// JSON Setup
+//--------------------------------------------------------------------------
+
+
+
+
+//--------------------------------------------------------------------------
 // U8G2 Display Setup
 //--------------------------------------------------------------------------
 //U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE, /* clock=*/ OLED_SCL, /* data=*/ OLED_SDA);   // ESP32 Thing, HW I2C with pin remapping
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ OLED_RST, /* clock=*/ OLED_SCL, /* data=*/ OLED_SDA);   // ESP32 Thing, HW I2C with pin remapping
-
 
 // Create a U8g2log object
 U8G2LOG u8g2log;
@@ -426,6 +453,10 @@ void display_chip_info()
 
 
 
+
+
+#endif
+
 void setup()
 {
   Serial.begin(115200);
@@ -479,7 +510,7 @@ void setup()
       ESP_LOGI(TAG, "Connecting to WiFi..");    
   }
 
-  ESP_LOGI(TAG, WiFi.localIP() );  
+  //ESP_LOGI(TAG, (WiFi.localIP() ) );  
   
 #endif
 
@@ -498,6 +529,10 @@ void setup()
   server.addHandler(&ws);
 #endif  
 
+#if (USE_MQTT)
+setup_mqtt();
+#endif
+
 
 draw("Moving solar panel", SUN, 0);
 display_chip_info();
@@ -506,5 +541,14 @@ display_chip_info();
 }
 
 void loop() {
-delay(10);
+
+  #if (USE_MQTT)
+  // MQTT Connection
+  if (!client.connected())
+  {
+    reconnect();
+  }
+  client.loop();
+#endif
+
 }
